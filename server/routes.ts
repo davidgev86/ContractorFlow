@@ -13,7 +13,7 @@ if (!process.env.STRIPE_SECRET_KEY && !process.env.VITE_STRIPE_PUBLIC_KEY) {
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2023-10-16",
+    apiVersion: "2023-10-16" as any,
   });
 }
 
@@ -285,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const subscription = await stripe.subscriptions.create({
           customer: customer.id,
-          items: lineItems,
+          items: lineItems as any,
           payment_behavior: 'default_incomplete',
           expand: ['latest_invoice.payment_intent'],
         });
@@ -296,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         const invoice = subscription.latest_invoice as Stripe.Invoice;
-        const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+        const paymentIntent = (invoice as any).payment_intent as Stripe.PaymentIntent;
 
         res.json({
           subscriptionId: subscription.id,

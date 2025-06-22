@@ -37,7 +37,7 @@ export const users = pgTable("users", {
   // Subscription fields
   planType: varchar("plan_type").default("trial"), // "trial", "core", "pro"
   setupPaid: boolean("setup_paid").default(false),
-  trialStart: timestamp("trial_start"),
+  trialStart: timestamp("trial_start").defaultNow(),
   subscriptionActive: boolean("subscription_active").default(false),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
