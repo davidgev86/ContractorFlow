@@ -22,6 +22,8 @@ export function Navigation() {
     { path: "/projects", label: "Projects", icon: FolderOpen },
     { path: "/clients", label: "Clients", icon: Users },
     { path: "/reports", label: "Reports", icon: BarChart3 },
+    { path: "/project-updates", label: "Updates", icon: FileText },
+    { path: "/client-portal-setup", label: "Portal", icon: ExternalLink },
   ];
 
   const isActive = (path: string) => {
