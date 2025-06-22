@@ -16,6 +16,7 @@ import Checkout from "@/pages/checkout";
 import ClientPortalLogin from "@/pages/client-portal-login";
 import ClientPortalDashboard from "@/pages/client-portal-dashboard";
 import ProjectUpdates from "@/pages/project-updates";
+import ClientPortalSetup from "@/pages/client-portal-setup";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -39,6 +40,7 @@ function Router() {
           <Route path="/clients" component={Clients} />
           <Route path="/reports" component={Reports} />
           <Route path="/project-updates" component={ProjectUpdates} />
+          <Route path="/client-portal-setup" component={ClientPortalSetup} />
           <Route path="/checkout" component={Checkout} />
         </>
       )}
