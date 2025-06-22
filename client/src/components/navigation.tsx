@@ -9,7 +9,9 @@ import {
   LayoutDashboard,
   FolderOpen,
   Users,
-  BarChart3
+  BarChart3,
+  FileText,
+  ExternalLink
 } from "lucide-react";
 
 export function Navigation() {
