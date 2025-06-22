@@ -139,10 +139,27 @@ export const budgetItemRelations = relations(budgetItems, ({ one }) => ({
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users);
-export const insertProjectSchema = createInsertSchema(projects);
-export const insertClientSchema = createInsertSchema(clients);
-export const insertTaskSchema = createInsertSchema(tasks);
-export const insertBudgetItemSchema = createInsertSchema(budgetItems);
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertClientSchema = createInsertSchema(clients).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertTaskSchema = createInsertSchema(tasks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  completedAt: true,
+});
+export const insertBudgetItemSchema = createInsertSchema(budgetItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 // Types
 export type UpsertUser = typeof users.$inferInsert;

@@ -43,6 +43,7 @@ export default function Clients() {
       email: "",
       phone: "",
       address: "",
+      userId: "",
     },
   });
 
@@ -61,6 +62,7 @@ export default function Clients() {
       });
     },
     onError: (error) => {
+      console.error("Client creation error:", error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -74,7 +76,7 @@ export default function Clients() {
       }
       toast({
         title: "Error",
-        description: "Failed to add client",
+        description: `Failed to add client: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -86,6 +88,7 @@ export default function Clients() {
   ) || [];
 
   const onSubmit = (data: z.infer<typeof insertClientSchema>) => {
+    console.log("Submitting client data:", data);
     createClientMutation.mutate(data);
   };
 
