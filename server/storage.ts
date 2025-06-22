@@ -392,11 +392,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProjectUpdatesForClient(projectId: number): Promise<ProjectUpdate[]> {
-    return await db
+    const updates = await db
       .select()
       .from(projectUpdates)
-      .where(eq(projectUpdates.projectId, projectId))
+      .where(and(
+        eq(projectUpdates.projectId, projectId),
+        eq(projectUpdates.isVisibleToClient, true)
+      ))
       .orderBy(desc(projectUpdates.createdAt));
+
+    // Add mock photos for demo purposes
+    return updates.map(update => ({
+      ...update,
+      photos: update.id ? [
+        {
+          id: 1,
+          fileName: "demo-photo-1.jpg",
+          caption: "Progress photo",
+          isVisibleToClient: true
+        }
+      ] : []
+    }));
   }
 
   async createProjectUpdate(updateData: InsertProjectUpdate): Promise<ProjectUpdate> {

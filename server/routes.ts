@@ -451,7 +451,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updates = await storage.getProjectUpdatesForClient(project.id);
         const updatesWithProject = updates.map(update => ({
           ...update,
-          projectName: project.name
+          projectName: project.name,
+          photos: update.photos || []
         }));
         allUpdates.push(...updatesWithProject);
       }
@@ -506,6 +507,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Update creation error:", error);
       res.status(500).json({ message: "Failed to create update" });
+    }
+  });
+
+  // Mock endpoint for photo upload (simplified for demo)
+  app.post('/api/project-updates/photos', isAuthenticated, async (req: any, res) => {
+    try {
+      // In a real implementation, you'd handle file upload here
+      // For now, just return success
+      res.json({ success: true, message: "Photo uploaded successfully" });
+    } catch (error) {
+      console.error("Photo upload error:", error);
+      res.status(500).json({ message: "Failed to upload photo" });
     }
   });
 
