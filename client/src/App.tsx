@@ -28,27 +28,17 @@ function Router() {
 
   return (
     <Switch>
-      {!isAuthenticated ? (
+      <Route path="/" component={!isAuthenticated ? Landing : Dashboard} />
+      <Route path="/pricing" component={Pricing} />
+      {isAuthenticated && (
         <>
-          <Route path="/" component={Landing} />
-          <Route path="/pricing" component={Pricing} />
-          <Route>
-            <NotFound />
-          </Route>
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
           <Route path="/projects" component={Projects} />
           <Route path="/clients" component={Clients} />
           <Route path="/reports" component={Reports} />
-          <Route path="/pricing" component={Pricing} />
           <Route path="/checkout" component={Checkout} />
-          <Route>
-            <NotFound />
-          </Route>
         </>
       )}
+      <Route path="/:rest*" component={NotFound} />
     </Switch>
   );
 }
