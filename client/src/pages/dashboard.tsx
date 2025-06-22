@@ -63,7 +63,10 @@ export default function Dashboard() {
                 <p className="mt-1 text-blue-100">Here's what's happening with your projects today</p>
               </div>
               <div className="mt-4 md:mt-0 md:ml-4">
-                <Button className="bg-white text-primary hover:bg-gray-50 font-medium">
+                <Button 
+                  className="bg-white text-primary hover:bg-gray-50 font-medium"
+                  onClick={() => window.location.href = '/projects'}
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   New Project
                 </Button>
