@@ -1,0 +1,342 @@
+import {
+  users,
+  projects,
+  clients,
+  tasks,
+  budgetItems,
+  type User,
+  type UpsertUser,
+  type Project,
+  type InsertProject,
+  type Client,
+  type InsertClient,
+  type Task,
+  type InsertTask,
+  type BudgetItem,
+  type InsertBudgetItem,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc, sql } from "drizzle-orm";
+
+export interface IStorage {
+  // User operations - mandatory for Replit Auth
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  updateUserSubscription(id: string, data: {
+    planType?: string;
+    setupPaid?: boolean;
+    subscriptionActive?: boolean;
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+  }): Promise<User>;
+  
+  // Project operations
+  getProjects(userId: string): Promise<Project[]>;
+  getProject(id: number, userId: string): Promise<Project | undefined>;
+  createProject(project: InsertProject): Promise<Project>;
+  updateProject(id: number, userId: string, data: Partial<InsertProject>): Promise<Project>;
+  deleteProject(id: number, userId: string): Promise<void>;
+  
+  // Client operations
+  getClients(userId: string): Promise<Client[]>;
+  getClient(id: number, userId: string): Promise<Client | undefined>;
+  createClient(client: InsertClient): Promise<Client>;
+  updateClient(id: number, userId: string, data: Partial<InsertClient>): Promise<Client>;
+  deleteClient(id: number, userId: string): Promise<void>;
+  
+  // Task operations
+  getTasks(userId: string, projectId?: number): Promise<Task[]>;
+  getTask(id: number, userId: string): Promise<Task | undefined>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: number, userId: string, data: Partial<InsertTask>): Promise<Task>;
+  deleteTask(id: number, userId: string): Promise<void>;
+  
+  // Budget operations
+  getBudgetItems(userId: string, projectId?: number): Promise<BudgetItem[]>;
+  getBudgetItem(id: number, userId: string): Promise<BudgetItem | undefined>;
+  createBudgetItem(item: InsertBudgetItem): Promise<BudgetItem>;
+  updateBudgetItem(id: number, userId: string, data: Partial<InsertBudgetItem>): Promise<BudgetItem>;
+  deleteBudgetItem(id: number, userId: string): Promise<void>;
+  
+  // Dashboard stats
+  getDashboardStats(userId: string): Promise<{
+    activeProjects: number;
+    dueThisWeek: number;
+    revenueMTD: string;
+    activeClients: number;
+    monthlyTarget: string;
+    profit: string;
+    expenses: string;
+  }>;
+}
+
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  async updateUserSubscription(id: string, data: {
+    planType?: string;
+    setupPaid?: boolean;
+    subscriptionActive?: boolean;
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+  }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  // Project operations
+  async getProjects(userId: string): Promise<Project[]> {
+    return await db
+      .select()
+      .from(projects)
+      .where(eq(projects.userId, userId))
+      .orderBy(desc(projects.updatedAt));
+  }
+
+  async getProject(id: number, userId: string): Promise<Project | undefined> {
+    const [project] = await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.id, id), eq(projects.userId, userId)));
+    return project;
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    const [newProject] = await db
+      .insert(projects)
+      .values(project)
+      .returning();
+    return newProject;
+  }
+
+  async updateProject(id: number, userId: string, data: Partial<InsertProject>): Promise<Project> {
+    const [project] = await db
+      .update(projects)
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq(projects.id, id), eq(projects.userId, userId)))
+      .returning();
+    return project;
+  }
+
+  async deleteProject(id: number, userId: string): Promise<void> {
+    await db
+      .delete(projects)
+      .where(and(eq(projects.id, id), eq(projects.userId, userId)));
+  }
+
+  // Client operations
+  async getClients(userId: string): Promise<Client[]> {
+    return await db
+      .select()
+      .from(clients)
+      .where(eq(clients.userId, userId))
+      .orderBy(desc(clients.updatedAt));
+  }
+
+  async getClient(id: number, userId: string): Promise<Client | undefined> {
+    const [client] = await db
+      .select()
+      .from(clients)
+      .where(and(eq(clients.id, id), eq(clients.userId, userId)));
+    return client;
+  }
+
+  async createClient(client: InsertClient): Promise<Client> {
+    const [newClient] = await db
+      .insert(clients)
+      .values(client)
+      .returning();
+    return newClient;
+  }
+
+  async updateClient(id: number, userId: string, data: Partial<InsertClient>): Promise<Client> {
+    const [client] = await db
+      .update(clients)
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq(clients.id, id), eq(clients.userId, userId)))
+      .returning();
+    return client;
+  }
+
+  async deleteClient(id: number, userId: string): Promise<void> {
+    await db
+      .delete(clients)
+      .where(and(eq(clients.id, id), eq(clients.userId, userId)));
+  }
+
+  // Task operations
+  async getTasks(userId: string, projectId?: number): Promise<Task[]> {
+    const conditions = [eq(tasks.userId, userId)];
+    if (projectId) {
+      conditions.push(eq(tasks.projectId, projectId));
+    }
+
+    return await db
+      .select()
+      .from(tasks)
+      .where(and(...conditions))
+      .orderBy(desc(tasks.createdAt));
+  }
+
+  async getTask(id: number, userId: string): Promise<Task | undefined> {
+    const [task] = await db
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+    return task;
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const [newTask] = await db
+      .insert(tasks)
+      .values(task)
+      .returning();
+    return newTask;
+  }
+
+  async updateTask(id: number, userId: string, data: Partial<InsertTask>): Promise<Task> {
+    const [task] = await db
+      .update(tasks)
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+      .returning();
+    return task;
+  }
+
+  async deleteTask(id: number, userId: string): Promise<void> {
+    await db
+      .delete(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+  }
+
+  // Budget operations
+  async getBudgetItems(userId: string, projectId?: number): Promise<BudgetItem[]> {
+    const conditions = [eq(budgetItems.userId, userId)];
+    if (projectId) {
+      conditions.push(eq(budgetItems.projectId, projectId));
+    }
+
+    return await db
+      .select()
+      .from(budgetItems)
+      .where(and(...conditions))
+      .orderBy(desc(budgetItems.createdAt));
+  }
+
+  async getBudgetItem(id: number, userId: string): Promise<BudgetItem | undefined> {
+    const [item] = await db
+      .select()
+      .from(budgetItems)
+      .where(and(eq(budgetItems.id, id), eq(budgetItems.userId, userId)));
+    return item;
+  }
+
+  async createBudgetItem(item: InsertBudgetItem): Promise<BudgetItem> {
+    const [newItem] = await db
+      .insert(budgetItems)
+      .values(item)
+      .returning();
+    return newItem;
+  }
+
+  async updateBudgetItem(id: number, userId: string, data: Partial<InsertBudgetItem>): Promise<BudgetItem> {
+    const [item] = await db
+      .update(budgetItems)
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq(budgetItems.id, id), eq(budgetItems.userId, userId)))
+      .returning();
+    return item;
+  }
+
+  async deleteBudgetItem(id: number, userId: string): Promise<void> {
+    await db
+      .delete(budgetItems)
+      .where(and(eq(budgetItems.id, id), eq(budgetItems.userId, userId)));
+  }
+
+  // Dashboard stats
+  async getDashboardStats(userId: string): Promise<{
+    activeProjects: number;
+    dueThisWeek: number;
+    revenueMTD: string;
+    activeClients: number;
+    monthlyTarget: string;
+    profit: string;
+    expenses: string;
+  }> {
+    // Active projects count
+    const [activeProjectsResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(projects)
+      .where(and(eq(projects.userId, userId), eq(projects.status, "in_progress")));
+
+    // Due this week count
+    const oneWeekFromNow = new Date();
+    oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+    
+    const [dueThisWeekResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(tasks)
+      .where(and(
+        eq(tasks.userId, userId),
+        sql`${tasks.dueDate} <= ${oneWeekFromNow.toISOString()}`,
+        eq(tasks.status, "pending")
+      ));
+
+    // Active clients count
+    const [activeClientsResult] = await db
+      .select({ count: sql<number>`count(distinct ${clients.id})` })
+      .from(clients)
+      .innerJoin(projects, eq(projects.clientId, clients.id))
+      .where(and(eq(clients.userId, userId), eq(projects.status, "in_progress")));
+
+    // Revenue calculation (sum of project budgets for completed/in-progress projects this month)
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const [revenueResult] = await db
+      .select({ total: sql<string>`COALESCE(SUM(${projects.budget}), 0)` })
+      .from(projects)
+      .where(and(
+        eq(projects.userId, userId),
+        sql`${projects.updatedAt} >= ${startOfMonth.toISOString()}`,
+        sql`${projects.status} IN ('in_progress', 'completed')`
+      ));
+
+    return {
+      activeProjects: activeProjectsResult.count || 0,
+      dueThisWeek: dueThisWeekResult.count || 0,
+      revenueMTD: `$${(parseFloat(revenueResult.total || "0") / 1000).toFixed(1)}k`,
+      activeClients: activeClientsResult.count || 0,
+      monthlyTarget: "$45,000",
+      profit: `$${(parseFloat(revenueResult.total || "0") * 0.75 / 1000).toFixed(1)}k`,
+      expenses: `$${(parseFloat(revenueResult.total || "0") * 0.25 / 1000).toFixed(1)}k`,
+    };
+  }
+}
+
+export const storage = new DatabaseStorage();
