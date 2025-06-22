@@ -52,7 +52,8 @@ export default function Landing() {
               <Button 
                 size="lg"
                 variant="outline"
-                className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-3"
+                onClick={() => window.location.href = '/pricing'}
+                className="border-2 border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-3 font-semibold"
               >
                 View Pricing
               </Button>
