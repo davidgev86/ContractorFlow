@@ -43,6 +43,8 @@ const projectFormSchema = insertProjectSchema.extend({
 export default function Projects() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -127,6 +129,46 @@ export default function Projects() {
     },
   });
 
+  const updateProjectMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      await apiRequest("PUT", `/api/projects/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      setIsEditDialogOpen(false);
+      setEditingProject(null);
+      toast({
+        title: "Success",
+        description: "Project updated successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Project update error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update project",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const editForm = useForm<z.infer<typeof projectFormSchema>>({
+    resolver: zodResolver(projectFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      status: "planning",
+      budget: "",
+      progress: 0,
+      userId: "",
+      clientId: undefined,
+      startDate: "",
+      endDate: "",
+      dueDate: "",
+    },
+  });
+
   const filteredProjects = projects?.filter((project: any) =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
@@ -162,6 +204,42 @@ export default function Projects() {
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
     };
     createProjectMutation.mutate(formattedData);
+  };
+
+  const onEditSubmit = (data: z.infer<typeof projectFormSchema>) => {
+    if (!editingProject) return;
+    
+    const formattedData = {
+      ...data,
+      startDate: data.startDate ? new Date(data.startDate) : undefined,
+      endDate: data.endDate ? new Date(data.endDate) : undefined,
+      dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+    };
+    updateProjectMutation.mutate({ id: editingProject.id, data: formattedData });
+  };
+
+  const handleEditProject = (project: any) => {
+    setEditingProject(project);
+    editForm.reset({
+      name: project.name || "",
+      description: project.description || "",
+      status: project.status || "planning",
+      budget: project.budget || "",
+      progress: project.progress || 0,
+      userId: project.userId || "",
+      clientId: project.clientId || undefined,
+      startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : "",
+      endDate: project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : "",
+      dueDate: project.dueDate ? new Date(project.dueDate).toISOString().split('T')[0] : "",
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleViewProject = (project: any) => {
+    toast({
+      title: "Project Details",
+      description: `${project.name} - Status: ${project.status}`,
+    });
   };
 
   return (
@@ -287,6 +365,79 @@ export default function Projects() {
                 </Form>
               </DialogContent>
             </Dialog>
+
+            {/* Edit Project Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Edit Project</DialogTitle>
+                </DialogHeader>
+                <Form {...editForm}>
+                  <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+                    <FormField
+                      control={editForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Project Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Kitchen Remodel - Johnson Home" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={editForm.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="planning">Planning</SelectItem>
+                              <SelectItem value="in_progress">In Progress</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="on_hold">On Hold</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={editForm.control}
+                      name="budget"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Budget</FormLabel>
+                          <FormControl>
+                            <Input placeholder="15000" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={updateProjectMutation.isPending}>
+                        {updateProjectMutation.isPending ? "Updating..." : "Update Project"}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
           
           {/* Search and Filters */}
@@ -358,11 +509,11 @@ export default function Projects() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => console.log("View project:", project.id)}>
+                          <DropdownMenuItem onClick={() => handleViewProject(project)}>
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => console.log("Edit project:", project.id)}>
+                          <DropdownMenuItem onClick={() => handleEditProject(project)}>
                             <Edit className="w-4 h-4 mr-2" />
                             Edit Project
                           </DropdownMenuItem>
