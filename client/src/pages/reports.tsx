@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,8 @@ import { Navigation } from "@/components/navigation";
 import { TrialBanner } from "@/components/trial-banner";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { 
   TrendingUp, 
@@ -21,6 +24,8 @@ import {
 
 export default function Reports() {
   const { toast } = useToast();
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [isClientReportDialogOpen, setIsClientReportDialogOpen] = useState(false);
   
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -88,10 +93,8 @@ export default function Reports() {
     });
   };
 
-  const generateClientReport = (projectId?: number) => {
-    const project = projects?.find((p: any) => p.id === projectId) || projects?.[0];
-    
-    if (!project) {
+  const generateClientReport = () => {
+    if (!selectedProjectId) {
       toast({
         title: "No Project Selected",
         description: "Please select a project to generate client report",
@@ -100,8 +103,22 @@ export default function Reports() {
       return;
     }
 
+    const project = projects?.find((p: any) => p.id === parseInt(selectedProjectId));
+    
+    if (!project) {
+      toast({
+        title: "Project Not Found",
+        description: "Selected project not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const client = clients?.find((c: any) => c.id === project.clientId);
+
     const clientReportData = {
       projectName: project.name,
+      clientName: client?.name || "N/A",
       status: project.status,
       startDate: project.startDate ? new Date(project.startDate).toLocaleDateString() : "N/A",
       endDate: project.endDate ? new Date(project.endDate).toLocaleDateString() : "N/A",
@@ -112,6 +129,7 @@ export default function Reports() {
     // Generate client-friendly CSV
     const csvContent = `Project Report - ${clientReportData.projectName}\n` +
       `Generated on: ${new Date().toLocaleDateString()}\n\n` +
+      `Client Name,${clientReportData.clientName}\n` +
       `Project Name,${clientReportData.projectName}\n` +
       `Status,${clientReportData.status.replace('_', ' ').toUpperCase()}\n` +
       `Start Date,${clientReportData.startDate}\n` +
@@ -127,6 +145,9 @@ export default function Reports() {
     a.click();
     window.URL.revokeObjectURL(url);
 
+    setIsClientReportDialogOpen(false);
+    setSelectedProjectId("");
+    
     toast({
       title: "Client Report Generated",
       description: `Report for ${project.name} has been downloaded`,
@@ -150,10 +171,47 @@ export default function Reports() {
                 <Download className="w-4 h-4" />
                 Export Business Report
               </Button>
-              <Button onClick={() => generateClientReport()} variant="outline" className="flex items-center gap-2">
-                <Share className="w-4 h-4" />
-                Generate Client Report
-              </Button>
+              <Dialog open={isClientReportDialogOpen} onOpenChange={setIsClientReportDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Share className="w-4 h-4" />
+                    Generate Client Report
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Generate Client Report</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium">Select Project</label>
+                      <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Choose a project" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {projects?.map((project: any) => {
+                            const client = clients?.find((c: any) => c.id === project.clientId);
+                            return (
+                              <SelectItem key={project.id} value={project.id.toString()}>
+                                {project.name} {client ? `(${client.name})` : ''}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button variant="outline" onClick={() => setIsClientReportDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={generateClientReport} disabled={!selectedProjectId}>
+                        Generate Report
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
           

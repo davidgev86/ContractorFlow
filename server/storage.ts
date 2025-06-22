@@ -279,19 +279,22 @@ export class DatabaseStorage implements IStorage {
 
   // Dashboard stats
   async getDashboardStats(userId: string): Promise<{
-    activeProjects: number;
-    dueThisWeek: number;
+    activeProjects: string;
+    dueThisWeek: string;
     revenueMTD: string;
-    activeClients: number;
+    activeClients: string;
     monthlyTarget: string;
     profit: string;
     expenses: string;
   }> {
-    // Active projects count
+    // Active projects count (including planning and in_progress, excluding completed and on_hold)
     const [activeProjectsResult] = await db
       .select({ count: sql<number>`count(*)` })
       .from(projects)
-      .where(and(eq(projects.userId, userId), eq(projects.status, "in_progress")));
+      .where(and(
+        eq(projects.userId, userId), 
+        sql`${projects.status} IN ('planning', 'in_progress')`
+      ));
 
     // Due this week count
     const oneWeekFromNow = new Date();
