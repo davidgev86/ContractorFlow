@@ -24,7 +24,7 @@ function Router() {
         <>
           <Route path="/" component={Landing} />
           <Route path="/pricing" component={Pricing} />
-          <Route component={Landing} />
+          <Route component={NotFound} />
         </>
       ) : (
         <>
