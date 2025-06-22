@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/navigation";
 import { TrialBanner } from "@/components/trial-banner";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import { 
   TrendingUp, 
   DollarSign, 
@@ -11,10 +13,15 @@ import {
   Users,
   BarChart3,
   PieChart,
-  Activity
+  Activity,
+  Download,
+  FileText,
+  Share
 } from "lucide-react";
 
 export default function Reports() {
+  const { toast } = useToast();
+  
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
   });
@@ -37,6 +44,95 @@ export default function Reports() {
   const pendingTasks = tasks?.filter((t: any) => t.status === "pending").length || 0;
   const completedTasks = tasks?.filter((t: any) => t.status === "completed").length || 0;
 
+  const generateBusinessReport = () => {
+    const reportData = {
+      totalRevenue: stats?.revenueMTD || "$0",
+      activeProjects: stats?.activeProjects || 0,
+      totalClients: clients?.length || 0,
+      completionRate: tasks?.length ? Math.round((completedTasks / tasks.length) * 100) : 0,
+      projectBreakdown: {
+        planning: projects?.filter((p: any) => p.status === "planning").length || 0,
+        inProgress: inProgressProjects,
+        completed: completedProjects,
+        onHold: projects?.filter((p: any) => p.status === "on_hold").length || 0
+      },
+      expenses: stats?.expenses || "$0",
+      profit: stats?.profit || "$0"
+    };
+
+    // Generate CSV format
+    const csvContent = `Business Report - ${new Date().toLocaleDateString()}\n\n` +
+      `Total Revenue,${reportData.totalRevenue}\n` +
+      `Active Projects,${reportData.activeProjects}\n` +
+      `Total Clients,${reportData.totalClients}\n` +
+      `Task Completion Rate,${reportData.completionRate}%\n` +
+      `Total Expenses,${reportData.expenses}\n` +
+      `Net Profit,${reportData.profit}\n\n` +
+      `Project Status Breakdown:\n` +
+      `Planning,${reportData.projectBreakdown.planning}\n` +
+      `In Progress,${reportData.projectBreakdown.inProgress}\n` +
+      `Completed,${reportData.projectBreakdown.completed}\n` +
+      `On Hold,${reportData.projectBreakdown.onHold}\n`;
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `business-report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Report Generated",
+      description: "Business report has been downloaded successfully",
+    });
+  };
+
+  const generateClientReport = (projectId?: number) => {
+    const project = projects?.find((p: any) => p.id === projectId) || projects?.[0];
+    
+    if (!project) {
+      toast({
+        title: "No Project Selected",
+        description: "Please select a project to generate client report",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const clientReportData = {
+      projectName: project.name,
+      status: project.status,
+      startDate: project.startDate ? new Date(project.startDate).toLocaleDateString() : "N/A",
+      endDate: project.endDate ? new Date(project.endDate).toLocaleDateString() : "N/A",
+      progress: project.progress || 0,
+      description: project.description || "No description provided"
+    };
+
+    // Generate client-friendly CSV
+    const csvContent = `Project Report - ${clientReportData.projectName}\n` +
+      `Generated on: ${new Date().toLocaleDateString()}\n\n` +
+      `Project Name,${clientReportData.projectName}\n` +
+      `Status,${clientReportData.status.replace('_', ' ').toUpperCase()}\n` +
+      `Start Date,${clientReportData.startDate}\n` +
+      `Target Completion,${clientReportData.endDate}\n` +
+      `Progress,${clientReportData.progress}%\n` +
+      `Description,${clientReportData.description}\n`;
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `client-report-${project.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Client Report Generated",
+      description: `Report for ${project.name} has been downloaded`,
+    });
+  };
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background">
@@ -44,9 +140,21 @@ export default function Reports() {
         <TrialBanner />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-slate-800">Reports & Analytics</h1>
-            <p className="text-slate-600 mt-1">Track your business performance and project metrics</p>
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Reports & Analytics</h1>
+              <p className="text-slate-600 mt-1">Track your business performance and project metrics</p>
+            </div>
+            <div className="mt-4 sm:mt-0 flex gap-3">
+              <Button onClick={generateBusinessReport} className="flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Export Business Report
+              </Button>
+              <Button onClick={() => generateClientReport()} variant="outline" className="flex items-center gap-2">
+                <Share className="w-4 h-4" />
+                Generate Client Report
+              </Button>
+            </div>
           </div>
           
           {/* Key Metrics */}

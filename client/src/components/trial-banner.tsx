@@ -11,7 +11,7 @@ export function TrialBanner() {
   }
 
   return (
-    <div className="bg-blue-600 text-white border-b border-blue-500">
+    <div className="bg-blue-600 text-white border-b border-blue-500" data-trial-banner>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex flex-col sm:flex-row items-center justify-between">
           <div className="flex items-center">
@@ -36,6 +36,10 @@ export function TrialBanner() {
               variant="ghost" 
               size="sm"
               className="text-blue-100 hover:text-white hover:bg-blue-500/30 border border-blue-400/30"
+              onClick={() => {
+                const banner = document.querySelector('[data-trial-banner]') as HTMLElement;
+                if (banner) banner.style.display = 'none';
+              }}
             >
               <X className="w-4 h-4" />
               <span className="sr-only">Dismiss</span>
