@@ -15,6 +15,7 @@ import Pricing from "@/pages/pricing";
 import Checkout from "@/pages/checkout";
 import ClientPortalLogin from "@/pages/client-portal-login";
 import ClientPortalDashboard from "@/pages/client-portal-dashboard";
+import ProjectUpdates from "@/pages/project-updates";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -37,9 +38,13 @@ function Router() {
           <Route path="/projects" component={Projects} />
           <Route path="/clients" component={Clients} />
           <Route path="/reports" component={Reports} />
+          <Route path="/project-updates" component={ProjectUpdates} />
           <Route path="/checkout" component={Checkout} />
         </>
       )}
+      {/* Client Portal Routes - Public */}
+      <Route path="/client-portal/login" component={ClientPortalLogin} />
+      <Route path="/client-portal/dashboard" component={ClientPortalDashboard} />
       <Route path="/:rest*" component={NotFound} />
     </Switch>
   );

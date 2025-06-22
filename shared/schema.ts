@@ -107,6 +107,41 @@ export const budgetItems = pgTable("budget_items", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Client portal tables
+export const clientPortalUsers = pgTable("client_portal_users", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: "cascade" }),
+  email: varchar("email").unique().notNull(),
+  passwordHash: varchar("password_hash").notNull(),
+  isActive: boolean("is_active").default(true),
+  lastLogin: timestamp("last_login"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const projectUpdates = pgTable("project_updates", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  isVisibleToClient: boolean("is_visible_to_client").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const projectPhotos = pgTable("project_photos", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }),
+  updateId: integer("update_id").references(() => projectUpdates.id, { onDelete: "cascade" }),
+  fileName: varchar("file_name").notNull(),
+  originalName: varchar("original_name").notNull(),
+  caption: text("caption"),
+  isVisibleToClient: boolean("is_visible_to_client").default(true),
+  uploadedBy: varchar("uploaded_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const userRelations = relations(users, ({ many }) => ({
   projects: many(projects),

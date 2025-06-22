@@ -354,6 +354,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }
 
+  // Client portal middleware
+  const verifyClientPortalToken = async (req: any, res: any, next: any) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as any;
+      const clientUser = await storage.getClientPortalUser(decoded.email);
+      
+      if (!clientUser || !clientUser.isActive) {
+        return res.status(401).json({ message: "Invalid or inactive account" });
+      }
+
+      req.clientUser = clientUser;
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+  };
+
+  // Client portal authentication
+  app.post('/api/client-portal/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      const clientUser = await storage.getClientPortalUser(email);
+      if (!clientUser || !clientUser.isActive) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, clientUser.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      await storage.updateClientPortalUserLogin(clientUser.id);
+
+      const token = jwt.sign(
+        { id: clientUser.id, email: clientUser.email },
+        process.env.JWT_SECRET || 'default-secret',
+        { expiresIn: '7d' }
+      );
+
+      res.json({ 
+        success: true, 
+        token,
+        user: {
+          id: clientUser.id,
+          email: clientUser.email,
+          clientId: clientUser.clientId
+        }
+      });
+    } catch (error) {
+      console.error("Client portal login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Client portal profile
+  app.get('/api/client-portal/profile', verifyClientPortalToken, async (req: any, res) => {
+    try {
+      const client = await storage.getClient(req.clientUser.clientId, '');
+      res.json({
+        name: client?.name,
+        email: client?.email,
+        phone: client?.phone
+      });
+    } catch (error) {
+      console.error("Profile fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  // Client portal projects
+  app.get('/api/client-portal/projects', verifyClientPortalToken, async (req: any, res) => {
+    try {
+      const projects = await storage.getClientProjects(req.clientUser.clientId);
+      res.json(projects);
+    } catch (error) {
+      console.error("Projects fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+
+  // Client portal updates
+  app.get('/api/client-portal/updates', verifyClientPortalToken, async (req: any, res) => {
+    try {
+      const projects = await storage.getClientProjects(req.clientUser.clientId);
+      const allUpdates = [];
+
+      for (const project of projects) {
+        const updates = await storage.getProjectUpdatesForClient(project.id);
+        const updatesWithProject = updates.map(update => ({
+          ...update,
+          projectName: project.name
+        }));
+        allUpdates.push(...updatesWithProject);
+      }
+
+      allUpdates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      res.json(allUpdates);
+    } catch (error) {
+      console.error("Updates fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch updates" });
+    }
+  });
+
+  // Create client portal user (for contractors to add clients)
+  app.post('/api/client-portal/create-user', isAuthenticated, async (req: any, res) => {
+    try {
+      const { clientId, email, password } = req.body;
+      
+      const existingUser = await storage.getClientPortalUser(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+      
+      const clientUser = await storage.createClientPortalUser({
+        clientId,
+        email,
+        passwordHash,
+        isActive: true
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Client portal user created",
+        user: {
+          id: clientUser.id,
+          email: clientUser.email
+        }
+      });
+    } catch (error) {
+      console.error("Client user creation error:", error);
+      res.status(500).json({ message: "Failed to create client user" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

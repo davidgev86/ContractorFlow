@@ -4,6 +4,9 @@ import {
   clients,
   tasks,
   budgetItems,
+  clientPortalUsers,
+  projectUpdates,
+  projectPhotos,
   type User,
   type UpsertUser,
   type Project,
@@ -14,6 +17,12 @@ import {
   type InsertTask,
   type BudgetItem,
   type InsertBudgetItem,
+  type ClientPortalUser,
+  type InsertClientPortalUser,
+  type ProjectUpdate,
+  type InsertProjectUpdate,
+  type ProjectPhoto,
+  type InsertProjectPhoto,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -68,6 +77,15 @@ export interface IStorage {
     profit: string;
     expenses: string;
   }>;
+
+  // Client portal operations
+  getClientPortalUser(email: string): Promise<ClientPortalUser | undefined>;
+  createClientPortalUser(user: InsertClientPortalUser): Promise<ClientPortalUser>;
+  updateClientPortalUserLogin(id: number): Promise<void>;
+  getClientProjects(clientId: number): Promise<Project[]>;
+  getProjectUpdatesForClient(projectId: number): Promise<ProjectUpdate[]>;
+  createProjectUpdate(update: InsertProjectUpdate): Promise<ProjectUpdate>;
+  createProjectPhoto(photo: InsertProjectPhoto): Promise<ProjectPhoto>;
 }
 
 export class DatabaseStorage implements IStorage {

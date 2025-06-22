@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { useClientPortalAuth, clientPortalRequest } from "@/hooks/useClientPortalAuth";
 import { 
   Calendar, 
   Camera, 
@@ -17,17 +18,18 @@ import {
 
 export default function ClientPortalDashboard() {
   const { toast } = useToast();
-
-  const { data: clientData, isLoading: clientLoading } = useQuery({
-    queryKey: ["/api/client-portal/profile"],
-  });
+  const { user: clientData, isLoading: clientLoading } = useClientPortalAuth();
 
   const { data: projects, isLoading: projectsLoading } = useQuery({
-    queryKey: ["/api/client-portal/projects"],
+    queryKey: ["client-portal-projects"],
+    queryFn: () => clientPortalRequest("/projects"),
+    enabled: !!clientData,
   });
 
   const { data: updates, isLoading: updatesLoading } = useQuery({
-    queryKey: ["/api/client-portal/updates"],
+    queryKey: ["client-portal-updates"],
+    queryFn: () => clientPortalRequest("/updates"),
+    enabled: !!clientData,
   });
 
   const handleLogout = () => {
