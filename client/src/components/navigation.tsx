@@ -46,7 +46,7 @@ export function Navigation() {
                     className={`${
                       isActive(item.path)
                         ? "text-primary border-b-2 border-primary"
-                        : "text-secondary hover:text-slate-700"
+                        : "text-slate-700 hover:text-slate-900"
                     } px-1 pt-1 pb-4 text-sm font-medium transition-colors`}
                   >
                     {item.label}
@@ -60,7 +60,7 @@ export function Navigation() {
             <div className="hidden md:flex items-center space-x-2">
               {user?.isTrialActive && !user?.subscriptionActive && (
                 <>
-                  <span className="text-sm text-secondary">
+                  <span className="text-sm text-slate-700 font-medium">
                     Trial: {user.trialDaysRemaining} days left
                   </span>
                   <Link href="/pricing">
@@ -115,7 +115,7 @@ export function Navigation() {
                     className={`${
                       isActive(item.path)
                         ? "text-primary bg-blue-50"
-                        : "text-secondary hover:bg-gray-50"
+                        : "text-slate-700 hover:bg-gray-50"
                     } flex items-center px-3 py-2 rounded-md font-medium`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -130,7 +130,7 @@ export function Navigation() {
             {user?.isTrialActive && !user?.subscriptionActive && (
               <div className="pt-2 mt-2 border-t border-gray-200">
                 <div className="flex items-center justify-between px-3 py-2">
-                  <span className="text-sm text-secondary">
+                  <span className="text-sm text-slate-700 font-medium">
                     Trial: {user.trialDaysRemaining} days left
                   </span>
                   <Link href="/pricing">
