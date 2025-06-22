@@ -58,6 +58,11 @@ export default function Projects() {
       status: "planning",
       budget: "",
       progress: 0,
+      userId: "",
+      clientId: undefined,
+      startDate: "",
+      endDate: "",
+      dueDate: "",
     },
   });
 
@@ -76,6 +81,7 @@ export default function Projects() {
       });
     },
     onError: (error) => {
+      console.error("Project creation error:", error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -89,7 +95,7 @@ export default function Projects() {
       }
       toast({
         title: "Error",
-        description: "Failed to create project",
+        description: `Failed to create project: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -121,7 +127,15 @@ export default function Projects() {
   };
 
   const onSubmit = (data: z.infer<typeof projectFormSchema>) => {
-    createProjectMutation.mutate(data);
+    console.log("Submitting project data:", data);
+    // Convert string dates to Date objects if they exist
+    const formattedData = {
+      ...data,
+      startDate: data.startDate ? new Date(data.startDate) : undefined,
+      endDate: data.endDate ? new Date(data.endDate) : undefined,
+      dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+    };
+    createProjectMutation.mutate(formattedData);
   };
 
   return (
