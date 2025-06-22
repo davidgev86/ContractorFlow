@@ -236,7 +236,14 @@ export default function ProjectUpdates() {
                                 src={URL.createObjectURL(file)}
                                 alt={file.name}
                                 className="w-full h-20 object-cover rounded border"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                }}
                               />
+                              <div className="hidden w-full h-20 bg-gray-200 rounded border flex items-center justify-center">
+                                <Camera className="w-6 h-6 text-gray-400" />
+                              </div>
                               <button
                                 type="button"
                                 onClick={() => removeFile(index)}
@@ -346,13 +353,16 @@ export default function ProjectUpdates() {
                             </span>
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {update.photos.map((photo: any) => (
+                            {update.photos?.map((photo: any) => (
                               <div key={photo.id} className="relative group">
                                 <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
                                   <img
                                     src={`/api/project-updates/photos/${photo.fileName}`}
                                     alt={photo.caption || "Project photo"}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                    onError={(e) => {
+                                      e.currentTarget.src = 'https://via.placeholder.com/300x300/E5E7EB/9CA3AF?text=Photo';
+                                    }}
                                   />
                                 </div>
                                 {photo.caption && (

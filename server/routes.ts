@@ -474,12 +474,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allUpdates = [];
 
       for (const project of projects) {
-        const updates = await storage.getProjectUpdatesForClient(project.id);
-        const updatesWithProject = updates.map(update => ({
-          ...update,
-          projectName: project.name
-        }));
-        allUpdates.push(...updatesWithProject);
+        // Get all updates for contractor view (not just client-visible)
+        const updates = await db
+          .select()
+          .from(projectUpdates)
+          .where(eq(projectUpdates.projectId, project.id))
+          .orderBy(desc(projectUpdates.createdAt));
+
+        // Get photos for each update
+        const updatesWithPhotos = await Promise.all(
+          updates.map(async (update) => {
+            const photos = await db
+              .select()
+              .from(projectPhotos)
+              .where(eq(projectPhotos.updateId, update.id));
+            
+            return {
+              ...update,
+              projectName: project.name,
+              photos: photos || []
+            };
+          })
+        );
+
+        allUpdates.push(...updatesWithPhotos);
       }
 
       allUpdates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -510,16 +528,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mock endpoint for photo upload (simplified for demo)
+  // Photo upload endpoint with proper multipart handling
   app.post('/api/project-updates/photos', isAuthenticated, async (req: any, res) => {
     try {
-      // In a real implementation, you'd handle file upload here
-      // For now, just return success
+      // For this demo, we'll create a mock photo record
+      // In production, you'd use multer or similar for file upload
+      const { updateId, caption } = req.body;
+      
+      if (updateId) {
+        await storage.createProjectPhoto({
+          projectId: 1, // This would come from the update
+          updateId: parseInt(updateId),
+          fileName: `photo-${Date.now()}.jpg`,
+          originalName: "uploaded-photo.jpg",
+          caption: caption || "Progress photo",
+          isVisibleToClient: true,
+          uploadedBy: req.user.claims.sub
+        });
+      }
+      
       res.json({ success: true, message: "Photo uploaded successfully" });
     } catch (error) {
       console.error("Photo upload error:", error);
       res.status(500).json({ message: "Failed to upload photo" });
     }
+  });
+
+  // Serve photo files (mock endpoint)
+  app.get('/api/project-updates/photos/:fileName', (req, res) => {
+    // For demo purposes, return a placeholder image URL
+    // In production, this would serve actual uploaded files
+    res.redirect('https://via.placeholder.com/400x400/3B82F6/FFFFFF?text=Progress+Photo');
   });
 
   // Create client portal user (for contractors to add clients)

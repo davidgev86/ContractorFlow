@@ -214,7 +214,16 @@ export default function ClientPortalDashboard() {
                             {update.photos?.map((photo: any, index: number) => (
                               <div key={photo.id || index} className="relative group cursor-pointer">
                                 <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
-                                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-green-100">
+                                  <img
+                                    src={`/api/project-updates/photos/${photo.fileName}`}
+                                    alt={photo.caption || "Project photo"}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                    }}
+                                  />
+                                  <div className="hidden w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-green-100">
                                     <div className="text-center">
                                       <Camera className="w-8 h-8 text-gray-500 mx-auto mb-2" />
                                       <p className="text-xs text-gray-600">Progress Photo</p>
