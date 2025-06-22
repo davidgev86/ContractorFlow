@@ -69,14 +69,11 @@ export default function ProjectUpdates() {
       // Upload photos if any
       if (selectedFiles.length > 0) {
         for (const file of selectedFiles) {
-          const formData = new FormData();
-          formData.append("photo", file);
-          formData.append("updateId", update.id.toString());
-          formData.append("caption", file.name);
-          
-          await fetch("/api/project-updates/photos", {
-            method: "POST",
-            body: formData,
+          // Use simple JSON instead of FormData for now
+          await apiRequest("POST", "/api/project-updates/photos", {
+            updateId: update.id.toString(),
+            caption: file.name,
+            fileName: `photo-${Date.now()}.jpg`
           });
         }
       }

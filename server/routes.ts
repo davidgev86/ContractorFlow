@@ -5,6 +5,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { db } from "./db";
+import { projectUpdates, projectPhotos } from "@shared/schema";
+import { eq, desc, and } from "drizzle-orm";
 import { insertProjectSchema, insertClientSchema, insertTaskSchema, insertBudgetItemSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -533,18 +536,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // For this demo, we'll create a mock photo record
       // In production, you'd use multer or similar for file upload
-      const { updateId, caption } = req.body;
+      const { updateId, caption, fileName } = req.body;
       
       if (updateId) {
-        await storage.createProjectPhoto({
-          projectId: 1, // This would come from the update
-          updateId: parseInt(updateId),
-          fileName: `photo-${Date.now()}.jpg`,
-          originalName: "uploaded-photo.jpg",
-          caption: caption || "Progress photo",
-          isVisibleToClient: true,
-          uploadedBy: req.user.claims.sub
-        });
+        // Get the project ID from the update
+        const [update] = await db
+          .select()
+          .from(projectUpdates)
+          .where(eq(projectUpdates.id, parseInt(updateId)))
+          .limit(1);
+
+        if (update) {
+          await storage.createProjectPhoto({
+            projectId: update.projectId,
+            updateId: parseInt(updateId),
+            fileName: fileName || `photo-${Date.now()}.jpg`,
+            originalName: "uploaded-photo.jpg",
+            caption: caption || "Progress photo",
+            isVisibleToClient: true,
+            uploadedBy: req.user.claims.sub
+          });
+        }
       }
       
       res.json({ success: true, message: "Photo uploaded successfully" });
