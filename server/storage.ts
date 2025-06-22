@@ -340,6 +340,65 @@ export class DatabaseStorage implements IStorage {
       expenses: `$${(parseFloat(revenueResult.total || "0") * 0.25 / 1000).toFixed(1)}k`,
     };
   }
+
+  // Client portal operations
+  async getClientPortalUser(email: string): Promise<ClientPortalUser | undefined> {
+    const [user] = await db
+      .select()
+      .from(clientPortalUsers)
+      .where(eq(clientPortalUsers.email, email));
+    return user;
+  }
+
+  async createClientPortalUser(userData: InsertClientPortalUser): Promise<ClientPortalUser> {
+    const [user] = await db
+      .insert(clientPortalUsers)
+      .values(userData)
+      .returning();
+    return user;
+  }
+
+  async updateClientPortalUserLogin(id: number): Promise<void> {
+    await db
+      .update(clientPortalUsers)
+      .set({ lastLogin: new Date() })
+      .where(eq(clientPortalUsers.id, id));
+  }
+
+  async getClientProjects(clientId: number): Promise<Project[]> {
+    return await db
+      .select()
+      .from(projects)
+      .where(eq(projects.clientId, clientId))
+      .orderBy(desc(projects.createdAt));
+  }
+
+  async getProjectUpdatesForClient(projectId: number): Promise<ProjectUpdate[]> {
+    return await db
+      .select()
+      .from(projectUpdates)
+      .where(and(
+        eq(projectUpdates.projectId, projectId),
+        eq(projectUpdates.isVisibleToClient, true)
+      ))
+      .orderBy(desc(projectUpdates.createdAt));
+  }
+
+  async createProjectUpdate(updateData: InsertProjectUpdate): Promise<ProjectUpdate> {
+    const [update] = await db
+      .insert(projectUpdates)
+      .values(updateData)
+      .returning();
+    return update;
+  }
+
+  async createProjectPhoto(photoData: InsertProjectPhoto): Promise<ProjectPhoto> {
+    const [photo] = await db
+      .insert(projectPhotos)
+      .values(photoData)
+      .returning();
+    return photo;
+  }
 }
 
 export const storage = new DatabaseStorage();

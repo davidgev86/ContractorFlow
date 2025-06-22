@@ -13,6 +13,8 @@ import Clients from "@/pages/clients";
 import Reports from "@/pages/reports";
 import Pricing from "@/pages/pricing";
 import Checkout from "@/pages/checkout";
+import ClientPortalLogin from "@/pages/client-portal-login";
+import ClientPortalDashboard from "@/pages/client-portal-dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {

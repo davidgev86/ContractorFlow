@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertProjectSchema, insertClientSchema, insertTaskSchema, insertBudgetItemSchema } from "@shared/schema";

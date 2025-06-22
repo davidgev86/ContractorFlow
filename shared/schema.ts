@@ -172,3 +172,28 @@ export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type Task = typeof tasks.$inferSelect;
 export type InsertBudgetItem = z.infer<typeof insertBudgetItemSchema>;
 export type BudgetItem = typeof budgetItems.$inferSelect;
+
+export const insertClientPortalUserSchema = createInsertSchema(clientPortalUsers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastLogin: true,
+});
+
+export const insertProjectUpdateSchema = createInsertSchema(projectUpdates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProjectPhotoSchema = createInsertSchema(projectPhotos).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type ClientPortalUser = typeof clientPortalUsers.$inferSelect;
+export type InsertClientPortalUser = z.infer<typeof insertClientPortalUserSchema>;
+export type ProjectUpdate = typeof projectUpdates.$inferSelect;
+export type InsertProjectUpdate = z.infer<typeof insertProjectUpdateSchema>;
+export type ProjectPhoto = typeof projectPhotos.$inferSelect;
+export type InsertProjectPhoto = z.infer<typeof insertProjectPhotoSchema>;
