@@ -1,0 +1,148 @@
+**Product Development Requirements (PDR) for Contractor Management Web App**
+
+---
+
+**Project Name:** ContractorFlow (Working Title)
+
+**Objective:**
+Build a mobile-friendly web application for small-to-medium contractors that offers essential project management tools with a highly competitive pricing model designed to undercut existing market solutions.
+
+---
+
+### Target Users:
+
+* Remodeling contractors
+* Subcontractors
+* General contractors with small crews
+* Residential and light commercial construction businesses
+
+---
+
+### Core Features (Available in All Plans):
+
+* Job scheduling and task assignments
+* Budget tracking (materials, labor, etc.)
+* Client portals to view project updates and documents
+* Mobile-friendly dashboard
+* Multiple user support (no per-user fees)
+
+### Premium Feature (Pro Plan Only):
+
+* QuickBooks integration (two-way sync)
+
+### Optional Add-On:
+
+* Concierge Onboarding (\$200 one-time) includes guided setup, project import, and live training session.
+
+---
+
+## Pricing Strategy
+
+### Tier 1: Core Plan
+
+* **Setup Fee:** \$199 one-time
+* **Monthly:** \$25
+* **Annual Option:** \$250/year (2 months free)
+* **Includes:** All core features
+* **Excludes:** QuickBooks integration
+
+### Tier 2: Pro Plan
+
+* **Setup Fee:** \$199 one-time
+* **Monthly:** \$35
+* **Annual Option:** \$350/year (2 months free)
+* **Includes:** All core features + QuickBooks integration
+
+### Optional Add-On
+
+* **Concierge Onboarding:** \$200 one-time (can be added during or after signup)
+
+### Trial & Guarantees
+
+* **Free Trial:** 14-day free trial on Core Plan
+* **Guarantee:** Optional 30- to 60-day money-back guarantee on setup fee and first month if unsatisfied
+
+---
+
+## Technical Implementation Overview
+
+### Tech Stack:
+
+* **Frontend:** React with Tailwind CSS
+* **Backend:** Node.js with Express.js
+* **Database:** Supabase (PostgreSQL) or Firebase (Firestore)
+* **Authentication:** Firebase Auth or Supabase Auth
+* **Payments:** Stripe (for setup fees, subscriptions, and onboarding add-ons)
+* **Hosting:** Vercel or Netlify
+* **Email (Optional):** SendGrid for transactional emails
+
+### Functional Requirements
+
+#### Subscription Logic:
+
+* User must pay setup fee and start a subscription after trial to access app
+* Store subscription state in user profile (setup\_paid, plan\_type, trial\_start, active)
+* Use Stripe Webhooks to confirm subscription and payments
+
+#### Pricing Page:
+
+* Clearly display Core vs. Pro tiers
+* Monthly/Annual toggle
+* Compare feature sets
+* Onboarding add-on shown as optional during signup
+
+#### Trial Flow:
+
+* Start trial on signup (store trial\_start date)
+* Restrict access after 14 days if no setup fee/subscription
+* Display upgrade modal after trial expiration
+
+#### Dashboard Access:
+
+* Conditional feature access based on plan type
+* Disable QuickBooks section unless on Pro Plan
+
+#### Admin Dashboard:
+
+* View users and payment status
+* Update pricing/tiers
+* Manually override subscription status if needed
+
+---
+
+## User Experience Flow
+
+1. User signs up → free trial begins (Core Plan features only)
+2. User prompted to pay \$199 setup + pick plan (Core or Pro)
+3. User optionally adds Concierge Onboarding (\$200)
+4. Stripe handles all billing; webhook confirms
+5. Dashboard unlocks full access post-payment
+6. Monthly or annual billing continues until canceled
+7. Users can upgrade Core → Pro via Stripe or dashboard toggle
+
+---
+
+## Notes for Development:
+
+* Prioritize responsive layout for mobile use
+* Create reusable feature flag system (e.g. "isPro", "setupPaid")
+* Stripe integration should support both one-time charges and subscriptions
+* Store Stripe subscription ID in user metadata for validation
+* Build UI/UX to reflect pricing model: focus on simplicity and perceived value
+* Consider adding CRM-style tags or timeline views in future updates
+
+---
+
+## Future Enhancements:
+
+* Dedicated mobile app (PWA or native)
+* File storage for blueprints and invoices
+* Task chat/comments per job
+* Multi-language support for Spanish-speaking contractors
+* Equipment tracking and rental management
+
+---
+
+This PDR includes all the logic, monetization strategy, and technical requirements needed to implement the hybrid pricing model, enforce plan access, and manage onboarding and billing in a scalable, solo-developer-friendly environment.
+
+---
