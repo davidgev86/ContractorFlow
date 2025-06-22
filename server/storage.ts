@@ -395,10 +395,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(projectUpdates)
-      .where(and(
-        eq(projectUpdates.projectId, projectId),
-        eq(projectUpdates.isVisibleToClient, true)
-      ))
+      .where(eq(projectUpdates.projectId, projectId))
       .orderBy(desc(projectUpdates.createdAt));
   }
 

@@ -465,6 +465,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Project updates endpoints
+  app.get('/api/project-updates', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const projects = await storage.getProjects(userId);
+      const allUpdates = [];
+
+      for (const project of projects) {
+        const updates = await storage.getProjectUpdatesForClient(project.id);
+        const updatesWithProject = updates.map(update => ({
+          ...update,
+          projectName: project.name
+        }));
+        allUpdates.push(...updatesWithProject);
+      }
+
+      allUpdates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      res.json(allUpdates);
+    } catch (error) {
+      console.error("Updates fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch updates" });
+    }
+  });
+
+  app.post('/api/project-updates', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { projectId, title, description, isVisibleToClient } = req.body;
+
+      const update = await storage.createProjectUpdate({
+        projectId: parseInt(projectId),
+        userId,
+        title,
+        description,
+        isVisibleToClient: isVisibleToClient ?? true
+      });
+
+      res.json(update);
+    } catch (error) {
+      console.error("Update creation error:", error);
+      res.status(500).json({ message: "Failed to create update" });
+    }
+  });
+
   // Create client portal user (for contractors to add clients)
   app.post('/api/client-portal/create-user', isAuthenticated, async (req: any, res) => {
     try {
