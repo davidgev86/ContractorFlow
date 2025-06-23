@@ -113,6 +113,8 @@ export const clientPortalUsers = pgTable("client_portal_users", {
   clientId: integer("client_id").references(() => clients.id, { onDelete: "cascade" }),
   email: varchar("email").unique().notNull(),
   passwordHash: varchar("password_hash").notNull(),
+  resetToken: varchar("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
   isActive: boolean("is_active").default(true),
   lastLogin: timestamp("last_login"),
   createdAt: timestamp("created_at").defaultNow(),

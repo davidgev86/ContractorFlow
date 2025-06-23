@@ -17,6 +17,8 @@ import ClientPortalLogin from "@/pages/client-portal-login";
 import ClientPortalDashboard from "@/pages/client-portal-dashboard";
 import ProjectUpdates from "@/pages/project-updates";
 import ClientPortalSetup from "@/pages/client-portal-setup";
+import ClientPortalForgotPassword from "@/pages/client-portal-forgot-password";
+import ClientPortalResetPassword from "@/pages/client-portal-reset-password";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -47,6 +49,8 @@ function Router() {
       {/* Client Portal Routes - Public */}
       <Route path="/client-portal/login" component={ClientPortalLogin} />
       <Route path="/client-portal/dashboard" component={ClientPortalDashboard} />
+      <Route path="/client-portal/forgot-password" component={ClientPortalForgotPassword} />
+      <Route path="/client-portal/reset-password" component={ClientPortalResetPassword} />
       <Route path="/:rest*" component={NotFound} />
     </Switch>
   );
