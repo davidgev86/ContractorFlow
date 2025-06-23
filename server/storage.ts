@@ -86,6 +86,12 @@ export interface IStorage {
   getProjectUpdatesForClient(projectId: number): Promise<ProjectUpdate[]>;
   createProjectUpdate(update: InsertProjectUpdate): Promise<ProjectUpdate>;
   createProjectPhoto(photo: InsertProjectPhoto): Promise<ProjectPhoto>;
+  
+  // Password reset operations
+  setPasswordResetToken(email: string, token: string, expiry: Date): Promise<void>;
+  getClientByResetToken(token: string): Promise<ClientPortalUser | undefined>;
+  updateClientPassword(id: number, passwordHash: string): Promise<void>;
+  clearResetToken(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -441,6 +447,45 @@ export class DatabaseStorage implements IStorage {
       .values(photoData)
       .returning();
     return photo;
+  }
+
+  // Password reset operations
+  async setPasswordResetToken(email: string, token: string, expiry: Date): Promise<void> {
+    await db
+      .update(clientPortalUsers)
+      .set({ 
+        resetToken: token,
+        resetTokenExpiry: expiry
+      })
+      .where(eq(clientPortalUsers.email, email));
+  }
+
+  async getClientByResetToken(token: string): Promise<ClientPortalUser | undefined> {
+    const [user] = await db
+      .select()
+      .from(clientPortalUsers)
+      .where(and(
+        eq(clientPortalUsers.resetToken, token),
+        sql`${clientPortalUsers.resetTokenExpiry} > NOW()`
+      ));
+    return user;
+  }
+
+  async updateClientPassword(id: number, passwordHash: string): Promise<void> {
+    await db
+      .update(clientPortalUsers)
+      .set({ passwordHash })
+      .where(eq(clientPortalUsers.id, id));
+  }
+
+  async clearResetToken(id: number): Promise<void> {
+    await db
+      .update(clientPortalUsers)
+      .set({ 
+        resetToken: null,
+        resetTokenExpiry: null
+      })
+      .where(eq(clientPortalUsers.id, id));
   }
 }
 
