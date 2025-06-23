@@ -607,6 +607,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Password reset request
+  app.post('/api/client-portal/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const clientUser = await storage.getClientPortalUser(email);
+      if (!clientUser || !clientUser.isActive) {
+        return res.json({ message: "If an account with that email exists, a reset link has been sent." });
+      }
+
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpiry = new Date(Date.now() + 30 * 60 * 1000);
+
+      await storage.setPasswordResetToken(email, resetToken, resetTokenExpiry);
+
+      console.log(`Password reset token for ${email}: ${resetToken}`);
+      console.log(`Reset URL: ${req.protocol}://${req.get('host')}/client-portal/reset-password?token=${resetToken}`);
+
+      res.json({ 
+        message: "If an account with that email exists, a reset link has been sent.",
+        resetToken: resetToken,
+        resetUrl: `/client-portal/reset-password?token=${resetToken}`
+      });
+    } catch (error) {
+      console.error("Password reset request error:", error);
+      res.status(500).json({ message: "Failed to process password reset request" });
+    }
+  });
+
+  // Password reset confirmation
+  app.post('/api/client-portal/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: "Token and new password are required" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      }
+
+      const clientUser = await storage.getClientByResetToken(token);
+      if (!clientUser) {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+      await storage.updateClientPassword(clientUser.id, passwordHash);
+      await storage.clearResetToken(clientUser.id);
+
+      res.json({ message: "Password has been reset successfully" });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
