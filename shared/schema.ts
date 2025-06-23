@@ -132,6 +132,18 @@ export const projectUpdates = pgTable("project_updates", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const updateRequests = pgTable("update_requests", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: "cascade" }),
+  requestedBy: varchar("requested_by").notNull(), // client email
+  title: varchar("title").notNull(),
+  description: text("description"),
+  status: varchar("status").default("pending"), // pending, reviewed, completed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const projectPhotos = pgTable("project_photos", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }),

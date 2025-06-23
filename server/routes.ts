@@ -7,7 +7,7 @@ import crypto from "crypto";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
-import { projectUpdates, projectPhotos } from "@shared/schema";
+import { projectUpdates, projectPhotos, updateRequests } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { insertProjectSchema, insertClientSchema, insertTaskSchema, insertBudgetItemSchema } from "@shared/schema";
 import { z } from "zod";
@@ -666,6 +666,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Password reset error:", error);
       res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
+  // Client portal - create update request
+  app.post('/api/client-portal/request-update', verifyClientPortalToken, async (req: any, res) => {
+    try {
+      const { projectId, title, description } = req.body;
+      
+      if (!projectId || !title) {
+        return res.status(400).json({ message: "Project ID and title are required" });
+      }
+
+      const updateRequest = await storage.createUpdateRequest({
+        projectId: parseInt(projectId),
+        clientId: req.clientUser.clientId,
+        requestedBy: req.clientUser.email,
+        title,
+        description: description || "",
+        status: "pending"
+      });
+
+      res.json(updateRequest);
+    } catch (error) {
+      console.error("Update request creation error:", error);
+      res.status(500).json({ message: "Failed to create update request" });
+    }
+  });
+
+  // Client portal - get update requests for client
+  app.get('/api/client-portal/update-requests', verifyClientPortalToken, async (req: any, res) => {
+    try {
+      const requests = await storage.getUpdateRequestsForClient(req.clientUser.clientId);
+      res.json(requests);
+    } catch (error) {
+      console.error("Update requests fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch update requests" });
+    }
+  });
+
+  // Contractor - get update requests
+  app.get('/api/update-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const requests = await storage.getUpdateRequestsForContractor(userId);
+      res.json(requests);
+    } catch (error) {
+      console.error("Update requests fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch update requests" });
+    }
+  });
+
+  // Contractor - update request status
+  app.put('/api/update-requests/:id/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const { status } = req.body;
+      const id = parseInt(req.params.id);
+      
+      if (!['pending', 'reviewed', 'completed'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      await storage.updateRequestStatus(id, status);
+      res.json({ message: "Status updated successfully" });
+    } catch (error) {
+      console.error("Update request status error:", error);
+      res.status(500).json({ message: "Failed to update status" });
     }
   });
 

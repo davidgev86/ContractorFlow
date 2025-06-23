@@ -92,6 +92,12 @@ export interface IStorage {
   getClientByResetToken(token: string): Promise<ClientPortalUser | undefined>;
   updateClientPassword(id: number, passwordHash: string): Promise<void>;
   clearResetToken(id: number): Promise<void>;
+  
+  // Update request operations
+  createUpdateRequest(request: InsertUpdateRequest): Promise<UpdateRequest>;
+  getUpdateRequestsForContractor(userId: string): Promise<UpdateRequest[]>;
+  getUpdateRequestsForClient(clientId: number): Promise<UpdateRequest[]>;
+  updateRequestStatus(id: number, status: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -486,6 +492,48 @@ export class DatabaseStorage implements IStorage {
         resetTokenExpiry: null
       })
       .where(eq(clientPortalUsers.id, id));
+  }
+
+  // Update request operations
+  async createUpdateRequest(requestData: InsertUpdateRequest): Promise<UpdateRequest> {
+    const [request] = await db
+      .insert(updateRequests)
+      .values(requestData)
+      .returning();
+    return request;
+  }
+
+  async getUpdateRequestsForContractor(userId: string): Promise<UpdateRequest[]> {
+    return await db
+      .select({
+        ...updateRequests,
+        projectName: projects.name,
+        clientName: clients.name,
+      })
+      .from(updateRequests)
+      .innerJoin(projects, eq(updateRequests.projectId, projects.id))
+      .innerJoin(clients, eq(updateRequests.clientId, clients.id))
+      .where(eq(projects.userId, userId))
+      .orderBy(desc(updateRequests.createdAt));
+  }
+
+  async getUpdateRequestsForClient(clientId: number): Promise<UpdateRequest[]> {
+    return await db
+      .select({
+        ...updateRequests,
+        projectName: projects.name,
+      })
+      .from(updateRequests)
+      .innerJoin(projects, eq(updateRequests.projectId, projects.id))
+      .where(eq(updateRequests.clientId, clientId))
+      .orderBy(desc(updateRequests.createdAt));
+  }
+
+  async updateRequestStatus(id: number, status: string): Promise<void> {
+    await db
+      .update(updateRequests)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(updateRequests.id, id));
   }
 }
 
