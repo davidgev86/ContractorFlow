@@ -93,7 +93,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
               ></div>
             </div>
           </div>
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => window.location.href = '/projects'}
+          >
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>

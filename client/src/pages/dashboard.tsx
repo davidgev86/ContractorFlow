@@ -26,6 +26,14 @@ import {
 
 export default function Dashboard() {
   const { user } = useAuth();
+
+  // Helper function to calculate progress percentage
+  const calculateProgress = (current?: string, target?: string) => {
+    if (!current || !target) return 0;
+    const currentNum = parseFloat(current.replace(/[$k,]/g, '')) * (current.includes('k') ? 1000 : 1);
+    const targetNum = parseFloat(target.replace(/[$k,]/g, '')) * (target.includes('k') ? 1000 : 1);
+    return Math.min(Math.round((currentNum / targetNum) * 100), 100);
+  };
   
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -134,7 +142,12 @@ export default function Dashboard() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg font-semibold">Recent Projects</CardTitle>
-                    <Button variant="ghost" size="sm" className="text-primary hover:text-blue-700">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-primary hover:text-blue-700"
+                      onClick={() => window.location.href = '/projects'}
+                    >
                       View All
                     </Button>
                   </div>
@@ -144,7 +157,14 @@ export default function Dashboard() {
                     <div className="p-6 text-center text-slate-500">Loading projects...</div>
                   ) : recentProjects.length === 0 ? (
                     <div className="p-6 text-center text-slate-500">
-                      No projects yet. <Button variant="link" className="p-0 h-auto">Create your first project</Button>
+                      No projects yet. 
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto"
+                        onClick={() => window.location.href = '/projects'}
+                      >
+                        Create your first project
+                      </Button>
                     </div>
                   ) : (
                     <div className="divide-y divide-gray-200">
@@ -161,7 +181,12 @@ export default function Dashboard() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg font-semibold">Today's Tasks</CardTitle>
-                    <Button variant="ghost" size="sm" className="text-primary hover:text-blue-700">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-primary hover:text-blue-700"
+                      onClick={() => window.location.href = '/projects'}
+                    >
                       Add Task
                     </Button>
                   </div>
@@ -171,7 +196,14 @@ export default function Dashboard() {
                     <div className="text-center text-slate-500">Loading tasks...</div>
                   ) : todaysTasks.length === 0 ? (
                     <div className="text-center text-slate-500">
-                      No tasks due today. <Button variant="link" className="p-0 h-auto">Schedule a task</Button>
+                      No tasks due today. 
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto"
+                        onClick={() => window.location.href = '/projects'}
+                      >
+                        Schedule a task
+                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -194,19 +226,34 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-3">
-                    <Button className="h-auto p-4 flex flex-col items-center space-y-2">
+                    <Button 
+                      className="h-auto p-4 flex flex-col items-center space-y-2"
+                      onClick={() => window.location.href = '/projects'}
+                    >
                       <Plus className="w-6 h-6" />
                       <span className="text-sm font-medium">New Project</span>
                     </Button>
-                    <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-center space-y-2"
+                      onClick={() => window.location.href = '/clients'}
+                    >
                       <Users className="w-6 h-6" />
                       <span className="text-sm font-medium">Add Client</span>
                     </Button>
-                    <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-center space-y-2"
+                      onClick={() => window.location.href = '/reports'}
+                    >
                       <DollarSign className="w-6 h-6" />
-                      <span className="text-sm font-medium">Create Invoice</span>
+                      <span className="text-sm font-medium">View Reports</span>
                     </Button>
-                    <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-center space-y-2"
+                      onClick={() => window.location.href = '/projects'}
+                    >
                       <Calendar className="w-6 h-6" />
                       <span className="text-sm font-medium">Schedule Task</span>
                     </Button>
@@ -228,9 +275,9 @@ export default function Dashboard() {
                           {statsLoading ? "..." : stats?.monthlyTarget || "$0"}
                         </span>
                       </div>
-                      <Progress value={54} className="h-3" />
+                      <Progress value={calculateProgress(stats?.revenueMTD, stats?.monthlyTarget)} className="h-3" />
                       <p className="text-xs text-slate-500 mt-1">
-                        {statsLoading ? "Loading..." : `${stats?.revenueMTD || "$0"} completed (54%)`}
+                        {statsLoading ? "Loading..." : `${stats?.revenueMTD || "$0"} completed (${calculateProgress(stats?.revenueMTD, stats?.monthlyTarget)}%)`}
                       </p>
                     </div>
                     

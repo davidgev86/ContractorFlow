@@ -348,14 +348,19 @@ export class DatabaseStorage implements IStorage {
         sql`${projects.status} IN ('in_progress', 'completed')`
       ));
 
+    const revenue = parseFloat(revenueResult.total || "0");
+    const monthlyTarget = 45000;
+    const profit = revenue * 0.75;
+    const expenses = revenue * 0.25;
+
     return {
-      activeProjects: activeProjectsResult.count || 0,
-      dueThisWeek: dueThisWeekResult.count || 0,
-      revenueMTD: `$${(parseFloat(revenueResult.total || "0") / 1000).toFixed(1)}k`,
-      activeClients: activeClientsResult.count || 0,
-      monthlyTarget: "$45,000",
-      profit: `$${(parseFloat(revenueResult.total || "0") * 0.75 / 1000).toFixed(1)}k`,
-      expenses: `$${(parseFloat(revenueResult.total || "0") * 0.25 / 1000).toFixed(1)}k`,
+      activeProjects: (activeProjectsResult.count || 0).toString(),
+      dueThisWeek: (dueThisWeekResult.count || 0).toString(),
+      revenueMTD: revenue >= 1000 ? `$${(revenue / 1000).toFixed(1)}k` : `$${revenue.toLocaleString()}`,
+      activeClients: (activeClientsResult.count || 0).toString(),
+      monthlyTarget: `$${(monthlyTarget / 1000).toFixed(0)}k`,
+      profit: profit >= 1000 ? `$${(profit / 1000).toFixed(1)}k` : `$${Math.round(profit).toLocaleString()}`,
+      expenses: expenses >= 1000 ? `$${(expenses / 1000).toFixed(1)}k` : `$${Math.round(expenses).toLocaleString()}`,
     };
   }
 
