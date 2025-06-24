@@ -354,7 +354,15 @@ export default function ClientPortalDashboard() {
                         <div className="flex-1">
                           <h3 className="font-semibold text-slate-800 mb-1">{request.title}</h3>
                           <p className="text-sm text-slate-600 mb-2">{request.description}</p>
-                          <p className="text-xs text-slate-500">
+                          
+                          {request.contractorReply && (
+                            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                              <div className="text-xs font-medium text-blue-700 mb-1">Contractor Reply:</div>
+                              <div className="text-sm text-blue-800">{request.contractorReply}</div>
+                            </div>
+                          )}
+                          
+                          <p className="text-xs text-slate-500 mt-2">
                             Project: {request.projectName} • {new Date(request.createdAt).toLocaleDateString()}
                           </p>
                         </div>
