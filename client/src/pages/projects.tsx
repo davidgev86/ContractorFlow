@@ -245,6 +245,10 @@ export default function Projects() {
     }
   };
 
+  const handleStatusChange = (id: number, status: string) => {
+    updateStatusMutation.mutate({ id, status });
+  };
+
   const getProjectIcon = (index: number) => {
     const icons = [Home, Hammer, Wrench];
     const Icon = icons[index % icons.length];
