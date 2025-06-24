@@ -1,8 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useClientPortalAuth, clientPortalRequest } from "@/hooks/useClientPortalAuth";
 import { 
@@ -13,11 +22,21 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  User
+  User,
+  MessageSquare,
+  Plus
 } from "lucide-react";
+
+const requestUpdateSchema = z.object({
+  projectId: z.string().min(1, "Please select a project"),
+  title: z.string().min(1, "Title is required"),
+  description: z.string(),
+});
 
 export default function ClientPortalDashboard() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const { user: clientData, isLoading: clientLoading } = useClientPortalAuth();
 
   const { data: projects, isLoading: projectsLoading } = useQuery({
