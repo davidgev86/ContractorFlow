@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Navigation } from "@/components/navigation";
 import { TrialBanner } from "@/components/trial-banner";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -30,7 +31,13 @@ import {
   Wrench,
   Edit,
   Trash2,
-  Eye
+  Eye,
+  MessageSquare,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  User,
+  FolderOpen
 } from "lucide-react";
 import { z } from "zod";
 
@@ -50,6 +57,31 @@ export default function Projects() {
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ["/api/projects"],
+  });
+
+  const { data: requests, isLoading: requestsLoading } = useQuery({
+    queryKey: ["/api/update-requests"],
+    queryFn: () => apiRequest("GET", "/api/update-requests"),
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      return apiRequest("PUT", `/api/update-requests/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/update-requests"] });
+      toast({
+        title: "Success",
+        description: "Request status updated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update request status",
+        variant: "destructive",
+      });
+    },
   });
 
   const { data: clients } = useQuery({

@@ -19,7 +19,7 @@ import ProjectUpdates from "@/pages/project-updates";
 import ClientPortalSetup from "@/pages/client-portal-setup";
 import ClientPortalForgotPassword from "@/pages/client-portal-forgot-password";
 import ClientPortalResetPassword from "@/pages/client-portal-reset-password";
-import ClientRequests from "@/pages/client-requests";
+
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -43,7 +43,6 @@ function Router() {
           <Route path="/clients" component={Clients} />
           <Route path="/reports" component={Reports} />
           <Route path="/project-updates" component={ProjectUpdates} />
-          <Route path="/client-requests" component={ClientRequests} />
           <Route path="/client-portal-setup" component={ClientPortalSetup} />
           <Route path="/checkout" component={Checkout} />
         </>
