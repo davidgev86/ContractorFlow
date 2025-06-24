@@ -362,6 +362,8 @@ export default function ClientPortalDashboard() {
                             </div>
                           )}
                           
+
+                          
                           <p className="text-xs text-slate-500 mt-2">
                             Project: {request.projectName} • {new Date(request.createdAt).toLocaleDateString()}
                           </p>
