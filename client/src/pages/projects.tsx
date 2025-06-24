@@ -284,7 +284,7 @@ export default function Projects() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
             <div>
               <h1 className="text-2xl font-bold text-slate-800">Projects</h1>
-              <p className="text-slate-600 mt-1">Manage all your construction projects</p>
+              <p className="text-slate-600 mt-1">Manage your construction projects and client requests</p>
             </div>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -471,22 +471,40 @@ export default function Projects() {
               </DialogContent>
             </Dialog>
           </div>
-          
-          {/* Search and Filters */}
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <Input
-                placeholder="Search projects..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          
-          {/* Projects Grid */}
-          {isLoading ? (
+
+          <Tabs defaultValue="projects" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="projects" className="flex items-center space-x-2">
+                <FolderOpen className="w-4 h-4" />
+                <span>Projects</span>
+              </TabsTrigger>
+              <TabsTrigger value="requests" className="flex items-center space-x-2">
+                <MessageSquare className="w-4 h-4" />
+                <span>Client Requests</span>
+                {requests && requests.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">
+                    {requests.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="projects" className="space-y-6">
+              {/* Search and Filters */}
+              <div className="mb-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search projects..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              {/* Projects Grid */}
+              {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
                 <Card key={i} className="animate-pulse">
@@ -606,8 +624,109 @@ export default function Projects() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
-          )}
+              </div>
+            )}
+            </TabsContent>
+
+            <TabsContent value="requests" className="space-y-6">
+              {requestsLoading ? (
+                <div className="grid gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardHeader>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="h-3 bg-gray-200 rounded"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : requests?.length === 0 ? (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <MessageSquare className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-slate-600 mb-2">No client requests yet</h3>
+                    <p className="text-slate-500">
+                      Client update requests will appear here when submitted through the client portal.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-6">
+                  {requests?.map((request: any) => (
+                    <Card key={request.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-xl mb-2">{request.title}</CardTitle>
+                            <div className="flex items-center space-x-4 text-sm text-slate-500 mb-3">
+                              <span className="flex items-center">
+                                <User className="w-4 h-4 mr-1" />
+                                {request.clientName}
+                              </span>
+                              <span className="flex items-center">
+                                <FolderOpen className="w-4 h-4 mr-1" />
+                                {request.projectName}
+                              </span>
+                              <span className="flex items-center">
+                                <Calendar className="w-4 h-4 mr-1" />
+                                {new Date(request.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            {getStatusIcon(request.status)}
+                            <Badge className={getStatusColor(request.status)}>
+                              {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {request.description && (
+                            <div>
+                              <h4 className="font-medium text-slate-700 mb-2">Details:</h4>
+                              <p className="text-slate-600 bg-slate-50 p-3 rounded-lg">
+                                {request.description}
+                              </p>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center justify-between pt-4 border-t">
+                            <div className="text-sm text-slate-500">
+                              Requested by: {request.requestedBy}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm font-medium text-slate-700">Update Status:</span>
+                              <Select
+                                value={request.status}
+                                onValueChange={(status) => handleStatusChange(request.id, status)}
+                                disabled={updateStatusMutation.isPending}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="reviewed">Reviewed</SelectItem>
+                                  <SelectItem value="completed">Completed</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </ProtectedRoute>
