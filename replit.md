@@ -113,7 +113,14 @@ ContractorFlow is a comprehensive project management application built specifica
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- June 24, 2025: Initial ContractorFlow setup with full-stack architecture
+- June 24, 2025: Implemented comprehensive client portal with authentication, project viewing, and update requests
+- June 24, 2025: Added contractor reply system for client requests with database integration
+- June 24, 2025: Integrated client requests into projects page using tabbed interface with status management
+- June 24, 2025: Fixed multiple runtime errors and implemented proper data handling for request management system
+
 ## Changelog
 
-Changelog:
-- June 24, 2025. Initial setup
+- June 24, 2025: Initial setup and core functionality implementation

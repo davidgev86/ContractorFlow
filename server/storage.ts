@@ -244,9 +244,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTask(task: InsertTask): Promise<Task> {
+    const taskData = {
+      ...task,
+      dueDate: task.dueDate ? new Date(task.dueDate) : null,
+      startDate: task.startDate ? new Date(task.startDate) : null,
+    };
+    
     const [newTask] = await db
       .insert(tasks)
-      .values(task)
+      .values(taskData)
       .returning();
     return newTask;
   }

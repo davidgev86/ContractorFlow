@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProjectSchema } from "@shared/schema";
+import { insertProjectSchema, insertTaskSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -54,6 +54,8 @@ export default function Projects() {
   const [editingProject, setEditingProject] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [replyTexts, setReplyTexts] = useState<{[key: number]: string}>({});
+  const [selectedProjectForTasks, setSelectedProjectForTasks] = useState<number | null>(null);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -63,6 +65,11 @@ export default function Projects() {
 
   const { data: requests, isLoading: requestsLoading } = useQuery({
     queryKey: ["/api/update-requests"],
+  });
+
+  const { data: projectTasks, isLoading: tasksLoading } = useQuery({
+    queryKey: ["/api/tasks", selectedProjectForTasks],
+    enabled: !!selectedProjectForTasks,
   });
 
   const updateStatusMutation = useMutation({
@@ -275,6 +282,46 @@ export default function Projects() {
     if (reply.trim()) {
       replyMutation.mutate({ id, reply });
     }
+  };
+
+  const createTaskMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof taskFormSchema>) => {
+      return apiRequest("POST", "/api/tasks", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      setIsTaskDialogOpen(false);
+      taskForm.reset();
+      toast({
+        title: "Success",
+        description: "Task created successfully",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to create task",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onTaskSubmit = (data: z.infer<typeof taskFormSchema>) => {
+    createTaskMutation.mutate({
+      ...data,
+      projectId: selectedProjectForTasks!,
+    });
   };
 
   const getProjectIcon = (index: number) => {
@@ -826,6 +873,270 @@ export default function Projects() {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Task Management Dialog */}
+        <Dialog open={!!selectedProjectForTasks} onOpenChange={(open) => {
+          if (!open) {
+            setSelectedProjectForTasks(null);
+            setIsTaskDialogOpen(false);
+          }
+        }}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Project Tasks</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Tasks for Project</h3>
+                <Button onClick={() => setIsTaskDialogOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Task
+                </Button>
+              </div>
+
+              {tasksLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="animate-pulse border rounded p-4">
+                      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : projectTasks?.length ? (
+                <div className="space-y-4">
+                  {projectTasks.map((task: any) => (
+                    <Card key={task.id}>
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-lg">{task.title}</CardTitle>
+                            {task.description && (
+                              <p className="text-sm text-slate-600 mt-1">{task.description}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge className={
+                              task.priority === 'urgent' ? 'bg-red-100 text-red-800' :
+                              task.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                              task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-green-100 text-green-800'
+                            }>
+                              {task.priority}
+                            </Badge>
+                            <Badge className={getStatusColor(task.status)}>
+                              {task.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          {task.assignedTo && (
+                            <div>
+                              <span className="font-medium text-slate-700">Assigned:</span>
+                              <p className="text-slate-600">{task.assignedTo}</p>
+                            </div>
+                          )}
+                          {task.dueDate && (
+                            <div>
+                              <span className="font-medium text-slate-700">Due:</span>
+                              <p className="text-slate-600">{new Date(task.dueDate).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                          {task.estimatedHours && (
+                            <div>
+                              <span className="font-medium text-slate-700">Est. Hours:</span>
+                              <p className="text-slate-600">{task.estimatedHours}h</p>
+                            </div>
+                          )}
+                          {task.startDate && (
+                            <div>
+                              <span className="font-medium text-slate-700">Start:</span>
+                              <p className="text-slate-600">{new Date(task.startDate).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Calendar className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-slate-600 mb-2">No tasks yet</h3>
+                  <p className="text-slate-500 mb-4">Create your first task to get started</p>
+                  <Button onClick={() => setIsTaskDialogOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Task
+                  </Button>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Task Dialog */}
+        <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Task</DialogTitle>
+            </DialogHeader>
+            <Form {...taskForm}>
+              <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-4">
+                <FormField
+                  control={taskForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Task Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter task title" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={taskForm.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Task description" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={taskForm.control}
+                    name="priority"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Priority</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select priority" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                            <SelectItem value="urgent">Urgent</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={taskForm.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="in_progress">In Progress</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={taskForm.control}
+                  name="assignedTo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assigned To</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name or email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={taskForm.control}
+                    name="estimatedHours"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estimated Hours</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="0" 
+                            {...field}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={taskForm.control}
+                    name="dueDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Due Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={taskForm.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={() => setIsTaskDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createTaskMutation.isPending}>
+                    {createTaskMutation.isPending ? "Creating..." : "Create Task"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
     </ProtectedRoute>
   );
