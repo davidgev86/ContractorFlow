@@ -32,6 +32,49 @@ export default function ClientPortalDashboard() {
     enabled: !!clientData,
   });
 
+  const { data: updateRequests, isLoading: requestsLoading } = useQuery({
+    queryKey: ["client-portal-update-requests"],
+    queryFn: () => clientPortalRequest("/update-requests"),
+    enabled: !!clientData,
+  });
+
+  const form = useForm<z.infer<typeof requestUpdateSchema>>({
+    resolver: zodResolver(requestUpdateSchema),
+    defaultValues: {
+      projectId: "",
+      title: "",
+      description: "",
+    },
+  });
+
+  const createRequestMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof requestUpdateSchema>) => {
+      return await clientPortalRequest("/request-update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-portal-update-requests"] });
+      setIsRequestDialogOpen(false);
+      form.reset();
+      toast({
+        title: "Success",
+        description: "Update request submitted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to submit update request",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLogout = () => {
     localStorage.removeItem("clientPortalToken");
     window.location.href = "/client-portal/login";
@@ -45,6 +88,10 @@ export default function ClientPortalDashboard() {
         return <Clock className="w-4 h-4 text-yellow-500" />;
       case "planning":
         return <FileText className="w-4 h-4 text-blue-500" />;
+      case "pending":
+        return <Clock className="w-4 h-4 text-yellow-600" />;
+      case "reviewed":
+        return <AlertCircle className="w-4 h-4 text-blue-600" />;
       default:
         return <AlertCircle className="w-4 h-4 text-gray-500" />;
     }
@@ -57,6 +104,10 @@ export default function ClientPortalDashboard() {
       case "in_progress":
         return "bg-yellow-100 text-yellow-800";
       case "planning":
+        return "bg-blue-100 text-blue-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "reviewed":
         return "bg-blue-100 text-blue-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -88,10 +139,99 @@ export default function ClientPortalDashboard() {
                 <p className="text-sm text-slate-600">Project Portal</p>
               </div>
             </div>
-            <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
-              <LogOut className="w-4 h-4" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-3">
+              <Dialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" />
+                    Request Update
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Request Project Update</DialogTitle>
+                  </DialogHeader>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit((data) => createRequestMutation.mutate(data))} className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="projectId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Project</FormLabel>
+                            <FormControl>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a project" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {projects?.map((project: any) => (
+                                    <SelectItem key={project.id} value={project.id.toString()}>
+                                      {project.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Request Title</FormLabel>
+                            <FormControl>
+                              <Input placeholder="What would you like to know?" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description (Optional)</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Provide additional details about your request..."
+                                rows={3}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="flex justify-end space-x-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => setIsRequestDialogOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={createRequestMutation.isPending}>
+                          {createRequestMutation.isPending ? "Submitting..." : "Submit Request"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+              
+              <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -163,6 +303,66 @@ export default function ClientPortalDashboard() {
                 <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Projects Yet</h3>
                 <p className="text-gray-600">Your projects will appear here once they are created.</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Update Requests */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-800 mb-6">Your Update Requests</h2>
+          
+          {requestsLoading ? (
+            <Card className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="border-b pb-4 last:border-b-0">
+                      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : updateRequests?.length ? (
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-6">
+                  {updateRequests.map((request: any) => (
+                    <div key={request.id} className="border-b pb-6 last:border-b-0 last:pb-0">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-slate-800 mb-1">{request.title}</h3>
+                          <p className="text-sm text-slate-600 mb-2">{request.description}</p>
+                          <p className="text-xs text-slate-500">
+                            Project: {request.projectName} • {new Date(request.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {getStatusIcon(request.status)}
+                          <Badge className={getStatusColor(request.status)}>
+                            {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <MessageSquare className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <h3 className="font-medium text-slate-600 mb-2">No update requests yet</h3>
+                <p className="text-sm text-slate-500 mb-4">
+                  Click "Request Update" to ask your contractor for project information.
+                </p>
+                <Button onClick={() => setIsRequestDialogOpen(true)} className="flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Request Update
+                </Button>
               </CardContent>
             </Card>
           )}
