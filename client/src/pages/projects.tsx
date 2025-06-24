@@ -219,6 +219,32 @@ export default function Projects() {
     }
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "pending":
+        return <Clock className="w-4 h-4 text-yellow-600" />;
+      case "reviewed":
+        return <AlertCircle className="w-4 h-4 text-blue-600" />;
+      case "completed":
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const getRequestStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "reviewed":
+        return "bg-blue-100 text-blue-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   const getProjectIcon = (index: number) => {
     const icons = [Home, Hammer, Wrench];
     const Icon = icons[index % icons.length];
@@ -679,7 +705,7 @@ export default function Projects() {
                           </div>
                           <div className="flex items-center space-x-3">
                             {getStatusIcon(request.status)}
-                            <Badge className={getStatusColor(request.status)}>
+                            <Badge className={getRequestStatusColor(request.status)}>
                               {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                             </Badge>
                           </div>
