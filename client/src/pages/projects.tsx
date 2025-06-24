@@ -61,7 +61,6 @@ export default function Projects() {
 
   const { data: requests, isLoading: requestsLoading } = useQuery({
     queryKey: ["/api/update-requests"],
-    queryFn: () => apiRequest("GET", "/api/update-requests"),
   });
 
   const updateStatusMutation = useMutation({
@@ -481,7 +480,7 @@ export default function Projects() {
               <TabsTrigger value="requests" className="flex items-center space-x-2">
                 <MessageSquare className="w-4 h-4" />
                 <span>Client Requests</span>
-                {requests && requests.length > 0 && (
+                {requests && Array.isArray(requests) && requests.length > 0 && (
                   <Badge variant="secondary" className="ml-2">
                     {requests.length}
                   </Badge>
@@ -645,7 +644,7 @@ export default function Projects() {
                     </Card>
                   ))}
                 </div>
-              ) : requests?.length === 0 ? (
+              ) : !requests || !Array.isArray(requests) || requests.length === 0 ? (
                 <Card>
                   <CardContent className="p-12 text-center">
                     <MessageSquare className="w-16 h-16 text-slate-400 mx-auto mb-4" />
@@ -657,7 +656,7 @@ export default function Projects() {
                 </Card>
               ) : (
                 <div className="grid gap-6">
-                  {requests?.map((request: any) => (
+                  {Array.isArray(requests) && requests.map((request: any) => (
                     <Card key={request.id} className="hover:shadow-md transition-shadow">
                       <CardHeader>
                         <div className="flex items-start justify-between">
