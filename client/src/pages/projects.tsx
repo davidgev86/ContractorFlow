@@ -319,9 +319,11 @@ export default function Projects() {
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: z.infer<typeof taskFormSchema>) => {
+      console.log('Creating task with data:', data);
       return apiRequest("POST", "/api/tasks", data);
     },
     onSuccess: () => {
+      console.log('Task created successfully');
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       setIsTaskDialogOpen(false);
       taskForm.reset();
@@ -331,6 +333,7 @@ export default function Projects() {
       });
     },
     onError: (error) => {
+      console.error('Task creation error:', error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -351,6 +354,7 @@ export default function Projects() {
   });
 
   const onTaskSubmit = (data: z.infer<typeof taskFormSchema>) => {
+    console.log('Task form submitted:', data);
     createTaskMutation.mutate({
       ...data,
       projectId: selectedProjectForTasks!,
@@ -929,7 +933,13 @@ export default function Projects() {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">Tasks for Project</h3>
-                <Button onClick={() => setIsTaskDialogOpen(true)}>
+                <Button 
+                  onClick={() => {
+                    console.log('Add Task button clicked');
+                    setIsTaskDialogOpen(true);
+                  }}
+                  type="button"
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Task
                 </Button>
@@ -1007,7 +1017,13 @@ export default function Projects() {
                   <Calendar className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-slate-600 mb-2">No tasks yet</h3>
                   <p className="text-slate-500 mb-4">Create your first task to get started</p>
-                  <Button onClick={() => setIsTaskDialogOpen(true)}>
+                  <Button 
+                    onClick={() => {
+                      console.log('Add Task button clicked (empty state)');
+                      setIsTaskDialogOpen(true);
+                    }}
+                    type="button"
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Task
                   </Button>
@@ -1018,7 +1034,13 @@ export default function Projects() {
         </Dialog>
 
         {/* Create Task Dialog */}
-        <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
+        <Dialog 
+          open={isTaskDialogOpen} 
+          onOpenChange={(open) => {
+            console.log('Task dialog state changed:', open);
+            setIsTaskDialogOpen(open);
+          }}
+        >
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Task</DialogTitle>
