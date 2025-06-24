@@ -11,7 +11,8 @@ import {
   Users,
   BarChart3,
   FileText,
-  ExternalLink
+  ExternalLink,
+  MessageSquare
 } from "lucide-react";
 
 export function Navigation() {
