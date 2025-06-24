@@ -138,6 +138,13 @@ export default function Projects() {
     },
   });
 
+  // Update task form when project selection changes
+  React.useEffect(() => {
+    if (selectedProjectForTasks) {
+      taskForm.setValue('projectId', selectedProjectForTasks);
+    }
+  }, [selectedProjectForTasks, taskForm]);
+
   const createProjectMutation = useMutation({
     mutationFn: async (data: z.infer<typeof projectFormSchema>) => {
       await apiRequest("POST", "/api/projects", data);
@@ -914,6 +921,9 @@ export default function Projects() {
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Project Tasks</DialogTitle>
+              <DialogDescription>
+                Manage tasks for this project. Create, view, and track task progress.
+              </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-6">
@@ -1009,12 +1019,16 @@ export default function Projects() {
 
         {/* Create Task Dialog */}
         <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Task</DialogTitle>
+              <DialogDescription>
+                Add a new task to this project with priority, scheduling, and assignment details.
+              </DialogDescription>
             </DialogHeader>
-            <Form {...taskForm}>
-              <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-4">
+            <div className="flex-1 overflow-y-auto">
+              <Form {...taskForm}>
+                <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-4">
                 <FormField
                   control={taskForm.control}
                   name="title"
@@ -1155,7 +1169,7 @@ export default function Projects() {
                   )}
                 />
 
-                <div className="flex justify-end space-x-2">
+                <div className="flex justify-end space-x-2 pt-4 border-t">
                   <Button type="button" variant="outline" onClick={() => setIsTaskDialogOpen(false)}>
                     Cancel
                   </Button>
@@ -1165,6 +1179,7 @@ export default function Projects() {
                 </div>
               </form>
             </Form>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

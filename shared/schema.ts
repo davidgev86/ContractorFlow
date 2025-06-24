@@ -207,6 +207,9 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   createdAt: true,
   updatedAt: true,
   completedAt: true,
+}).extend({
+  dueDate: z.string().optional(),
+  startDate: z.string().optional(),
 });
 export const insertBudgetItemSchema = createInsertSchema(budgetItems).omit({
   id: true,
