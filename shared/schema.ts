@@ -140,6 +140,7 @@ export const updateRequests = pgTable("update_requests", {
   title: varchar("title").notNull(),
   description: text("description"),
   status: varchar("status").default("pending"), // pending, reviewed, completed
+  contractorReply: text("contractor_reply"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

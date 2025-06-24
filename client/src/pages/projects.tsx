@@ -753,27 +753,68 @@ export default function Projects() {
                               </p>
                             </div>
                           )}
-                          
-                          <div className="flex items-center justify-between pt-4 border-t">
-                            <div className="text-sm text-slate-500">
-                              Requested by: {request.requestedBy}
+
+                          {request.contractorReply && (
+                            <div className="pt-4 border-t">
+                              <h4 className="font-medium text-slate-700 mb-2">Your Reply:</h4>
+                              <p className="text-slate-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                {request.contractorReply}
+                              </p>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-slate-700">Update Status:</span>
-                              <Select
-                                value={request.status}
-                                onValueChange={(status) => handleStatusChange(request.id, status)}
-                                disabled={updateStatusMutation.isPending}
-                              >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="reviewed">Reviewed</SelectItem>
-                                  <SelectItem value="completed">Completed</SelectItem>
-                                </SelectContent>
-                              </Select>
+                          )}
+                          
+                          <div className="pt-4 border-t space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm text-slate-500">
+                                Requested by: {request.requestedBy}
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-slate-700">Status:</span>
+                                <Select
+                                  value={request.status}
+                                  onValueChange={(status) => handleStatusChange(request.id, status)}
+                                  disabled={updateStatusMutation.isPending}
+                                >
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="reviewed">Reviewed</SelectItem>
+                                    <SelectItem value="completed">Completed</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-slate-700">Reply to Client:</label>
+                              <div className="flex space-x-2">
+                                <Textarea
+                                  placeholder="Type your response to the client..."
+                                  value={replyTexts[request.id] || ''}
+                                  onChange={(e) => setReplyTexts(prev => ({
+                                    ...prev,
+                                    [request.id]: e.target.value
+                                  }))}
+                                  className="flex-1 min-h-[80px]"
+                                />
+                                <Button
+                                  onClick={() => {
+                                    handleSendReply(request.id, replyTexts[request.id] || '');
+                                    setReplyTexts(prev => ({
+                                      ...prev,
+                                      [request.id]: ''
+                                    }));
+                                  }}
+                                  disabled={!replyTexts[request.id]?.trim() || replyMutation.isPending}
+                                  size="sm"
+                                  className="self-end"
+                                >
+                                  <Send className="w-4 h-4 mr-1" />
+                                  Send
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>

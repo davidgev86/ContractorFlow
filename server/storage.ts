@@ -539,6 +539,13 @@ export class DatabaseStorage implements IStorage {
       .set({ status, updatedAt: new Date() })
       .where(eq(updateRequests.id, id));
   }
+
+  async updateRequestReply(id: number, reply: string): Promise<void> {
+    await db
+      .update(updateRequests)
+      .set({ contractorReply: reply, updatedAt: new Date() })
+      .where(eq(updateRequests.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();
