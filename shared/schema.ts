@@ -85,8 +85,11 @@ export const tasks = pgTable("tasks", {
   userId: varchar("user_id").notNull(),
   assignedTo: varchar("assigned_to"),
   status: varchar("status").default("pending"), // "pending", "in_progress", "completed"
-  priority: varchar("priority").default("medium"), // "low", "medium", "high"
+  priority: varchar("priority").default("medium"), // "low", "medium", "high", "urgent"
+  estimatedHours: integer("estimated_hours"),
+  actualHours: integer("actual_hours"),
   dueDate: timestamp("due_date"),
+  startDate: timestamp("start_date"),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

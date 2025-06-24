@@ -72,6 +72,17 @@ export default function Projects() {
     enabled: !!selectedProjectForTasks,
   });
 
+  const formSchema = insertProjectSchema.extend({
+    budget: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    dueDate: z.string().optional(),
+  });
+
+  const taskFormSchema = insertTaskSchema.extend({
+    projectId: z.number(),
+  });
+
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
       return apiRequest("PUT", `/api/update-requests/${id}/status`, { status });
@@ -109,6 +120,21 @@ export default function Projects() {
       startDate: "",
       endDate: "",
       dueDate: "",
+    },
+  });
+
+  const taskForm = useForm<z.infer<typeof taskFormSchema>>({
+    resolver: zodResolver(taskFormSchema),
+    defaultValues: {
+      projectId: selectedProjectForTasks || 0,
+      title: "",
+      description: "",
+      status: "pending",
+      priority: "medium",
+      assignedTo: "",
+      estimatedHours: 0,
+      dueDate: "",
+      startDate: "",
     },
   });
 
@@ -666,6 +692,10 @@ export default function Projects() {
                           <DropdownMenuItem onClick={() => handleViewProject(project)}>
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedProjectForTasks(project.id)}>
+                            <Calendar className="w-4 h-4 mr-2" />
+                            Manage Tasks
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleEditProject(project)}>
                             <Edit className="w-4 h-4 mr-2" />
