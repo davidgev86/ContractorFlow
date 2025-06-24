@@ -240,9 +240,17 @@ export const insertProjectPhotoSchema = createInsertSchema(projectPhotos).omit({
   createdAt: true,
 });
 
+export const insertUpdateRequestSchema = createInsertSchema(updateRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type ClientPortalUser = typeof clientPortalUsers.$inferSelect;
 export type InsertClientPortalUser = z.infer<typeof insertClientPortalUserSchema>;
 export type ProjectUpdate = typeof projectUpdates.$inferSelect;
 export type InsertProjectUpdate = z.infer<typeof insertProjectUpdateSchema>;
 export type ProjectPhoto = typeof projectPhotos.$inferSelect;
 export type InsertProjectPhoto = z.infer<typeof insertProjectPhotoSchema>;
+export type UpdateRequest = typeof updateRequests.$inferSelect;
+export type InsertUpdateRequest = z.infer<typeof insertUpdateRequestSchema>;
