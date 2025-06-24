@@ -37,7 +37,8 @@ import {
   CheckCircle,
   AlertCircle,
   User,
-  FolderOpen
+  FolderOpen,
+  Send
 } from "lucide-react";
 import { z } from "zod";
 
@@ -52,6 +53,7 @@ export default function Projects() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [replyTexts, setReplyTexts] = useState<{[key: number]: string}>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -247,6 +249,32 @@ export default function Projects() {
 
   const handleStatusChange = (id: number, status: string) => {
     updateStatusMutation.mutate({ id, status });
+  };
+
+  const replyMutation = useMutation({
+    mutationFn: async ({ id, reply }: { id: number; reply: string }) => {
+      return apiRequest("PUT", `/api/update-requests/${id}/reply`, { reply });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/update-requests"] });
+      toast({
+        title: "Success",
+        description: "Reply sent successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to send reply",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSendReply = (id: number, reply: string) => {
+    if (reply.trim()) {
+      replyMutation.mutate({ id, reply });
+    }
   };
 
   const getProjectIcon = (index: number) => {

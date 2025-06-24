@@ -101,6 +101,7 @@ export interface IStorage {
   getUpdateRequestsForContractor(userId: string): Promise<UpdateRequest[]>;
   getUpdateRequestsForClient(clientId: number): Promise<UpdateRequest[]>;
   updateRequestStatus(id: number, status: string): Promise<void>;
+  updateRequestReply(id: number, reply: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
