@@ -1315,13 +1315,8 @@ export default function Projects() {
           </Tabs>
         </div>
 
-        {/* Task Management Dialog */}
-        <Dialog open={!!selectedProjectForTasks && !isTaskDialogOpen} onOpenChange={(open) => {
-          if (!open) {
-            setSelectedProjectForTasks(null);
-            setIsTaskDialogOpen(false);
-          }
-        }}>
+        {/* Task Management Dialog - Disabled since we're using tabs instead */}
+        <Dialog open={false} onOpenChange={() => {}}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Project Tasks</DialogTitle>
