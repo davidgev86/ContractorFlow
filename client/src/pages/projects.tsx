@@ -59,6 +59,7 @@ export default function Projects() {
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskDetailDialogOpen, setIsTaskDetailDialogOpen] = useState(false);
+
   const [taskNotes, setTaskNotes] = useState("");
   const [taskActualHours, setTaskActualHours] = useState(0);
   const { toast } = useToast();
@@ -285,6 +286,36 @@ export default function Projects() {
         return <CheckCircle className="w-4 h-4 text-green-600" />;
       default:
         return <Clock className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const getTaskStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "in_progress":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "blocked":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getTaskPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "urgent":
+        return "text-red-600 border-red-200";
+      case "high":
+        return "text-orange-600 border-orange-200";
+      case "medium":
+        return "text-blue-600 border-blue-200";
+      case "low":
+        return "text-gray-600 border-gray-200";
+      default:
+        return "text-gray-600 border-gray-200";
     }
   };
 
