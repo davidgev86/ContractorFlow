@@ -1546,7 +1546,7 @@ export default function Projects() {
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Task description" {...field} />
+                        <Textarea placeholder="Task description" {...field} value={field.value ?? ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1560,7 +1560,7 @@ export default function Projects() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Priority</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select priority" />
@@ -1584,7 +1584,7 @@ export default function Projects() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select status" />
@@ -1609,7 +1609,7 @@ export default function Projects() {
                     <FormItem>
                       <FormLabel>Assigned To</FormLabel>
                       <FormControl>
-                        <Input placeholder="Name or email" {...field} />
+                        <Input placeholder="Name or email" {...field} value={field.value ?? ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1628,6 +1628,7 @@ export default function Projects() {
                             type="number" 
                             placeholder="0" 
                             {...field}
+                            value={field.value?.toString() ?? ""}
                             onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                           />
                         </FormControl>
