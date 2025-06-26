@@ -73,7 +73,8 @@ export default function Projects() {
   });
 
   const { data: projectTasks, isLoading: tasksLoading } = useQuery({
-    queryKey: ["/api/tasks", selectedProjectForTasks],
+    queryKey: ["/api/tasks"],
+    select: (data: any) => selectedProjectForTasks ? data?.filter((task: any) => task.projectId === selectedProjectForTasks) : [],
     enabled: !!selectedProjectForTasks,
   });
 
