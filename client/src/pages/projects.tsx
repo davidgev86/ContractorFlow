@@ -359,9 +359,21 @@ export default function Projects() {
 
   const onTaskSubmit = (data: z.infer<typeof taskFormSchema>) => {
     console.log('Task form submitted:', data);
+    console.log('Selected project ID:', selectedProjectForTasks);
+    
+    if (!selectedProjectForTasks) {
+      console.error('No project selected for task creation');
+      toast({
+        title: "Error",
+        description: "No project selected",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     createTaskMutation.mutate({
       ...data,
-      projectId: selectedProjectForTasks!,
+      projectId: selectedProjectForTasks,
     });
   };
 
@@ -1063,7 +1075,14 @@ export default function Projects() {
             </DialogHeader>
             <div className="flex-1 overflow-y-auto">
               <Form {...taskForm}>
-                <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-4">
+                <form 
+                  onSubmit={(e) => {
+                    console.log('Form submit event triggered');
+                    e.preventDefault();
+                    taskForm.handleSubmit(onTaskSubmit)(e);
+                  }} 
+                  className="space-y-4"
+                >
                 <FormField
                   control={taskForm.control}
                   name="title"
@@ -1208,7 +1227,11 @@ export default function Projects() {
                   <Button type="button" variant="outline" onClick={() => setIsTaskDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createTaskMutation.isPending}>
+                  <Button 
+                    type="submit" 
+                    disabled={createTaskMutation.isPending}
+                    onClick={() => console.log('Create Task button clicked', taskForm.formState.errors)}
+                  >
                     {createTaskMutation.isPending ? "Creating..." : "Create Task"}
                   </Button>
                 </div>
