@@ -641,7 +641,7 @@ export default function Projects() {
             </Dialog>
           </div>
 
-          <Tabs defaultValue="projects" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="projects" className="flex items-center space-x-2">
                 <FolderOpen className="w-4 h-4" />
