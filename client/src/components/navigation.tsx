@@ -47,15 +47,15 @@ export function Navigation() {
             <div className="hidden md:ml-8 md:flex md:space-x-8">
               {navItems.map((item) => (
                 <Link key={item.path} href={item.path}>
-                  <a
+                  <span
                     className={`${
                       isActive(item.path)
                         ? "text-primary border-b-2 border-primary"
                         : "text-slate-700 hover:text-slate-900"
-                    } px-1 pt-1 pb-4 text-sm font-medium transition-colors`}
+                    } px-1 pt-1 pb-4 text-sm font-medium transition-colors cursor-pointer`}
                   >
                     {item.label}
-                  </a>
+                  </span>
                 </Link>
               ))}
             </div>
@@ -116,17 +116,17 @@ export function Navigation() {
               const Icon = item.icon;
               return (
                 <Link key={item.path} href={item.path}>
-                  <a
+                  <div
                     className={`${
                       isActive(item.path)
                         ? "text-primary bg-blue-50"
                         : "text-slate-700 hover:bg-gray-50"
-                    } flex items-center px-3 py-2 rounded-md font-medium`}
+                    } flex items-center px-3 py-2 rounded-md font-medium cursor-pointer`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Icon className="w-5 h-5 mr-3" />
                     {item.label}
-                  </a>
+                  </div>
                 </Link>
               );
             })}

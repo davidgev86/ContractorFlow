@@ -42,6 +42,69 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 
+// Type definitions
+interface User {
+  id: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  planType?: string;
+  subscriptionActive?: boolean;
+  isTrialActive?: boolean;
+  trialDaysRemaining?: number;
+}
+
+interface Project {
+  id: number;
+  name: string;
+  description?: string;
+  status: string;
+  budget?: string;
+  progress?: number;
+  clientId?: number;
+  userId: string;
+  startDate?: string;
+  endDate?: string;
+  dueDate?: string;
+}
+
+interface Client {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  userId: string;
+}
+
+interface Task {
+  id: number;
+  title: string;
+  description?: string;
+  projectId: number;
+  userId: string;
+  status: string;
+  priority: string;
+  assignedTo?: string;
+  estimatedHours?: number;
+  actualHours?: number;
+  dueDate?: string;
+  startDate?: string;
+}
+
+interface UpdateRequest {
+  id: number;
+  projectId: number;
+  clientId: number;
+  requestType: string;
+  description: string;
+  status: string;
+  reply?: string;
+  createdAt: string;
+  client?: Client;
+  project?: Project;
+}
+
 const projectFormSchema = insertProjectSchema.extend({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
@@ -65,17 +128,17 @@ export default function Projects() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: projects, isLoading } = useQuery({
+  const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: requests, isLoading: requestsLoading } = useQuery({
+  const { data: requests, isLoading: requestsLoading } = useQuery<UpdateRequest[]>({
     queryKey: ["/api/update-requests"],
   });
 
-  const { data: projectTasks, isLoading: tasksLoading } = useQuery({
+  const { data: projectTasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
-    select: (data: any) => selectedProjectForTasks ? data?.filter((task: any) => task.projectId === selectedProjectForTasks) : [],
+    select: (data: Task[]) => selectedProjectForTasks ? data?.filter((task: Task) => task.projectId === selectedProjectForTasks) : [],
     enabled: !!selectedProjectForTasks,
   });
 
@@ -110,11 +173,11 @@ export default function Projects() {
     },
   });
 
-  const { data: clients } = useQuery({
+  const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
   });
 
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
   });
 
@@ -138,7 +201,7 @@ export default function Projects() {
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
       projectId: selectedProjectForTasks || 0,
-      userId: user?.id || "",
+      userId: (user as any)?.id || "",
       title: "",
       description: "",
       status: "pending",
