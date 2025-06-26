@@ -830,6 +830,318 @@ export default function Projects() {
             )}
             </TabsContent>
 
+            <TabsContent value="tasks" className="space-y-6">
+              {selectedProjectForTasks ? (
+                <div className="bg-white">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-xl font-semibold text-slate-800 mb-2">
+                        Project Tasks
+                      </h2>
+                      <p className="text-slate-600">
+                        Manage tasks for Project ID: {selectedProjectForTasks}
+                      </p>
+                    </div>
+                    <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Task
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                          <DialogTitle>Create New Task</DialogTitle>
+                        </DialogHeader>
+                        <Form {...taskForm}>
+                          <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-4">
+                            <FormField
+                              control={taskForm.control}
+                              name="title"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Task Title</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Install kitchen cabinets" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={taskForm.control}
+                              name="description"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Description</FormLabel>
+                                  <FormControl>
+                                    <Textarea 
+                                      placeholder="Detailed task description..."
+                                      {...field}
+                                      value={field.value || ""}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <FormField
+                                control={taskForm.control}
+                                name="status"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Status</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="in_progress">In Progress</SelectItem>
+                                        <SelectItem value="completed">Completed</SelectItem>
+                                        <SelectItem value="blocked">Blocked</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={taskForm.control}
+                                name="priority"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Priority</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select priority" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="low">Low</SelectItem>
+                                        <SelectItem value="medium">Medium</SelectItem>
+                                        <SelectItem value="high">High</SelectItem>
+                                        <SelectItem value="urgent">Urgent</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <FormField
+                                control={taskForm.control}
+                                name="assignedTo"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Assigned To</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="John Smith" {...field} value={field.value || ""} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={taskForm.control}
+                                name="estimatedHours"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Estimated Hours</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        type="number" 
+                                        placeholder="8" 
+                                        {...field}
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : "")}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <FormField
+                                control={taskForm.control}
+                                name="startDate"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Start Date</FormLabel>
+                                    <FormControl>
+                                      <Input type="date" {...field} value={field.value || ""} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={taskForm.control}
+                                name="dueDate"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Due Date</FormLabel>
+                                    <FormControl>
+                                      <Input type="date" {...field} value={field.value || ""} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            
+                            <div className="flex justify-end space-x-2 pt-4">
+                              <Button type="button" variant="outline" onClick={() => setIsTaskDialogOpen(false)}>
+                                Cancel
+                              </Button>
+                              <Button type="submit" disabled={createTaskMutation.isPending}>
+                                {createTaskMutation.isPending ? "Creating..." : "Create Task"}
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+
+                  {/* Tasks List */}
+                  {tasksLoading ? (
+                    <div className="grid gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} className="animate-pulse">
+                          <CardHeader>
+                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              <div className="h-3 bg-gray-200 rounded"></div>
+                              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : projectTasks?.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-12 text-center">
+                        <Calendar className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-slate-600 mb-2">No tasks yet</h3>
+                        <p className="text-slate-500 mb-4">
+                          Create your first task to start managing project work.
+                        </p>
+                        <Button onClick={() => setIsTaskDialogOpen(true)}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create First Task
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="grid gap-4">
+                      {projectTasks?.map((task: any) => (
+                        <Card key={task.id} className="hover:shadow-md transition-shadow">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <CardTitle className="text-lg mb-2">{task.title}</CardTitle>
+                                <div className="flex items-center space-x-4 text-sm text-slate-500 mb-3">
+                                  <Badge className={getTaskStatusColor(task.status)}>
+                                    {task.status.replace("_", " ").replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                  </Badge>
+                                  <Badge variant="outline" className={getTaskPriorityColor(task.priority)}>
+                                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
+                                  </Badge>
+                                  {task.assignedTo && (
+                                    <span className="flex items-center">
+                                      <User className="w-4 h-4 mr-1" />
+                                      {task.assignedTo}
+                                    </span>
+                                  )}
+                                  {task.dueDate && (
+                                    <span className="flex items-center">
+                                      <Calendar className="w-4 h-4 mr-1" />
+                                      {new Date(task.dueDate).toLocaleDateString()}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              {task.description && (
+                                <p className="text-slate-600 bg-slate-50 p-3 rounded-lg">
+                                  {task.description}
+                                </p>
+                              )}
+
+                              {(task.estimatedHours || task.actualHours) && (
+                                <div className="flex items-center space-x-4 text-sm">
+                                  {task.estimatedHours && (
+                                    <span className="text-slate-600">
+                                      Estimated: {task.estimatedHours}h
+                                    </span>
+                                  )}
+                                  {task.actualHours && (
+                                    <span className="text-slate-600">
+                                      Actual: {task.actualHours}h
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                              
+                              <div className="flex items-center justify-between pt-4 border-t">
+                                <div className="text-sm text-slate-500">
+                                  Created: {new Date(task.createdAt).toLocaleDateString()}
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedTask(task);
+                                    setIsTaskDetailDialogOpen(true);
+                                  }}
+                                >
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  View Details
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-24 h-24 mx-auto bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                    <Calendar className="w-12 h-12 text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-slate-800 mb-2">Select a project to manage tasks</h3>
+                  <p className="text-slate-600 mb-4">
+                    Click "Manage Tasks" on any project card to view and manage its tasks
+                  </p>
+                  <Button onClick={() => setActiveTab("projects")}>
+                    <FolderOpen className="w-4 h-4 mr-2" />
+                    View Projects
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+
             <TabsContent value="requests" className="space-y-6">
               {requestsLoading ? (
                 <div className="grid gap-6">
