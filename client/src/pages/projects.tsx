@@ -127,6 +127,7 @@ export default function Projects() {
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
       projectId: selectedProjectForTasks || 0,
+      userId: user?.id || "",
       title: "",
       description: "",
       status: "pending",
@@ -138,12 +139,15 @@ export default function Projects() {
     },
   });
 
-  // Update task form when project selection changes
+  // Update task form when project selection or user changes
   React.useEffect(() => {
     if (selectedProjectForTasks) {
       taskForm.setValue('projectId', selectedProjectForTasks);
     }
-  }, [selectedProjectForTasks, taskForm]);
+    if (user?.id) {
+      taskForm.setValue('userId', user.id);
+    }
+  }, [selectedProjectForTasks, user?.id, taskForm]);
 
   const createProjectMutation = useMutation({
     mutationFn: async (data: z.infer<typeof projectFormSchema>) => {
@@ -955,6 +959,9 @@ export default function Projects() {
                     if (selectedProjectForTasks) {
                       taskForm.setValue('projectId', selectedProjectForTasks);
                     }
+                    if (user?.id) {
+                      taskForm.setValue('userId', user.id);
+                    }
                     setIsTaskDialogOpen(true);
                   }}
                   type="button"
@@ -1041,6 +1048,9 @@ export default function Projects() {
                       console.log('Add Task button clicked (empty state)');
                       if (selectedProjectForTasks) {
                         taskForm.setValue('projectId', selectedProjectForTasks);
+                      }
+                      if (user?.id) {
+                        taskForm.setValue('userId', user.id);
                       }
                       setIsTaskDialogOpen(true);
                     }}
