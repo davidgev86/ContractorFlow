@@ -55,6 +55,7 @@ export default function Projects() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [replyTexts, setReplyTexts] = useState<{[key: number]: string}>({});
   const [selectedProjectForTasks, setSelectedProjectForTasks] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState("projects");
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskDetailDialogOpen, setIsTaskDetailDialogOpen] = useState(false);
