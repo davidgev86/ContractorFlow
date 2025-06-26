@@ -327,6 +327,10 @@ export default function Projects() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       setIsTaskDialogOpen(false);
       taskForm.reset();
+      // Reset project selection after task creation
+      if (selectedProjectForTasks) {
+        taskForm.setValue('projectId', selectedProjectForTasks);
+      }
       toast({
         title: "Success",
         description: "Task created successfully",
@@ -916,7 +920,7 @@ export default function Projects() {
         </div>
 
         {/* Task Management Dialog */}
-        <Dialog open={!!selectedProjectForTasks} onOpenChange={(open) => {
+        <Dialog open={!!selectedProjectForTasks && !isTaskDialogOpen} onOpenChange={(open) => {
           if (!open) {
             setSelectedProjectForTasks(null);
             setIsTaskDialogOpen(false);
@@ -936,6 +940,9 @@ export default function Projects() {
                 <Button 
                   onClick={() => {
                     console.log('Add Task button clicked');
+                    if (selectedProjectForTasks) {
+                      taskForm.setValue('projectId', selectedProjectForTasks);
+                    }
                     setIsTaskDialogOpen(true);
                   }}
                   type="button"
@@ -1020,6 +1027,9 @@ export default function Projects() {
                   <Button 
                     onClick={() => {
                       console.log('Add Task button clicked (empty state)');
+                      if (selectedProjectForTasks) {
+                        taskForm.setValue('projectId', selectedProjectForTasks);
+                      }
                       setIsTaskDialogOpen(true);
                     }}
                     type="button"
@@ -1039,6 +1049,9 @@ export default function Projects() {
           onOpenChange={(open) => {
             console.log('Task dialog state changed:', open);
             setIsTaskDialogOpen(open);
+            if (!open) {
+              taskForm.reset();
+            }
           }}
         >
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

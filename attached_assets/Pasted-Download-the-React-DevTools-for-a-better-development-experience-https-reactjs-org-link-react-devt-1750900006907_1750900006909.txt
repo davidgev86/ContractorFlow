@@ -1,0 +1,23 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+chunk-RPCDYKBN.js?v=ae53d47e:521 Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a>.
+    at a
+    at a
+    at https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ae53d47e:337:18
+    at div
+    at div
+    at div
+    at div
+    at nav
+    at Navigation (https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/src/components/navigation.tsx:35:51)
+    at div
+    at ProtectedRoute (https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/src/components/protected-route.tsx:22:34)
+    at Projects (https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/src/pages/projects.tsx:66:39)
+    at Route (https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ae53d47e:323:16)
+    at Switch (https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ae53d47e:379:17)
+    at Router (https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/src/App.tsx?v=qL5X5OXicGSbQKH5J5Pc2:40:42)
+    at Provider (https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ae53d47e:38:15)
+    at TooltipProvider (https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=ae53d47e:61:5)
+    at QueryClientProvider (https://a4c65a28-b5d4-45e3-8f88-665314d99b6c-00-rco5hfc9ids7.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=ae53d47e:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=ae53d47e:521Understand this error
+4projects:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
