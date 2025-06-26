@@ -493,26 +493,14 @@ export default function Projects() {
 
   const onSubmit = (data: z.infer<typeof projectFormSchema>) => {
     console.log("Submitting project data:", data);
-    // Convert string dates to Date objects if they exist
-    const formattedData = {
-      ...data,
-      startDate: data.startDate ? new Date(data.startDate) : undefined,
-      endDate: data.endDate ? new Date(data.endDate) : undefined,
-      dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
-    };
-    createProjectMutation.mutate(formattedData);
+    // Keep dates as strings for API compatibility
+    createProjectMutation.mutate(data);
   };
 
   const onEditSubmit = (data: z.infer<typeof projectFormSchema>) => {
     if (!editingProject) return;
-    
-    const formattedData = {
-      ...data,
-      startDate: data.startDate ? new Date(data.startDate) : undefined,
-      endDate: data.endDate ? new Date(data.endDate) : undefined,
-      dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
-    };
-    updateProjectMutation.mutate({ id: editingProject.id, data: formattedData });
+    // Keep dates as strings for API compatibility
+    updateProjectMutation.mutate({ id: editingProject.id, data });
   };
 
   const handleEditProject = (project: any) => {
@@ -615,6 +603,7 @@ export default function Projects() {
                               placeholder="Complete kitchen renovation including..."
                               className="resize-none"
                               {...field}
+                              value={field.value ?? ""}
                             />
                           </FormControl>
                           <FormMessage />
@@ -629,7 +618,12 @@ export default function Projects() {
                         <FormItem>
                           <FormLabel>Budget</FormLabel>
                           <FormControl>
-                            <Input type="number" placeholder="12500" {...field} />
+                            <Input 
+                              type="number" 
+                              placeholder="12500" 
+                              {...field}
+                              value={field.value ?? ""}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -691,7 +685,7 @@ export default function Projects() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Status</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value ?? undefined}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select status" />
@@ -716,7 +710,7 @@ export default function Projects() {
                         <FormItem>
                           <FormLabel>Budget</FormLabel>
                           <FormControl>
-                            <Input placeholder="15000" {...field} />
+                            <Input placeholder="15000" {...field} value={field.value ?? ""} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

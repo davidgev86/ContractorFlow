@@ -2,6 +2,19 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+
+// Type definition for user
+interface User {
+  id: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  planType?: string;
+  subscriptionActive?: boolean;
+  isTrialActive?: boolean;
+  trialDaysRemaining?: number;
+}
 import { 
   HardHat, 
   Menu, 
@@ -18,7 +31,7 @@ import {
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | null };
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
