@@ -46,6 +46,9 @@ ContractorFlow is a comprehensive project management application built specifica
 ### Project Management
 - CRUD operations for projects, clients, and tasks
 - Project status tracking (planning, in_progress, completed, on_hold)
+- Advanced task scheduling with priority levels (low, medium, high, urgent)
+- Task assignment with time estimation and tracking (estimatedHours, actualHours)
+- Project-specific task management with due dates and start dates
 - Budget management with line items
 - File attachments for project updates
 - Progress tracking and reporting
@@ -120,6 +123,9 @@ Preferred communication style: Simple, everyday language.
 - June 24, 2025: Added contractor reply system for client requests with database integration
 - June 24, 2025: Integrated client requests into projects page using tabbed interface with status management
 - June 24, 2025: Fixed multiple runtime errors and implemented proper data handling for request management system
+- June 26, 2025: Completed advanced task scheduling system with comprehensive project-specific task management
+- June 26, 2025: Resolved dialog state conflicts and form validation issues for seamless task creation
+- June 26, 2025: Enhanced database schema with task tracking fields (estimatedHours, actualHours, startDate, priority levels)
 
 ## Changelog
 

@@ -56,6 +56,10 @@ export default function Projects() {
   const [replyTexts, setReplyTexts] = useState<{[key: number]: string}>({});
   const [selectedProjectForTasks, setSelectedProjectForTasks] = useState<number | null>(null);
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [isTaskDetailDialogOpen, setIsTaskDetailDialogOpen] = useState(false);
+  const [taskNotes, setTaskNotes] = useState("");
+  const [taskActualHours, setTaskActualHours] = useState(0);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
