@@ -107,6 +107,10 @@ export default function Projects() {
     queryKey: ["/api/clients"],
   });
 
+  const { data: user } = useQuery({
+    queryKey: ["/api/auth/user"],
+  });
+
   const form = useForm<z.infer<typeof projectFormSchema>>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
