@@ -642,10 +642,14 @@ export default function Projects() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="projects" className="flex items-center space-x-2">
                 <FolderOpen className="w-4 h-4" />
                 <span>Projects</span>
+              </TabsTrigger>
+              <TabsTrigger value="tasks" className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4" />
+                <span>Tasks</span>
               </TabsTrigger>
               <TabsTrigger value="requests" className="flex items-center space-x-2">
                 <MessageSquare className="w-4 h-4" />
@@ -792,6 +796,29 @@ export default function Projects() {
                             style={{ width: `${project.progress || 0}%` }}
                           ></div>
                         </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center justify-between pt-3 border-t mt-4">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedProjectForTasks(project.id);
+                            setActiveTab("tasks");
+                          }}
+                        >
+                          <Calendar className="w-4 h-4 mr-2" />
+                          Manage Tasks
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditProject(project)}
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
