@@ -21,6 +21,7 @@ import {
   FileText,
   Share
 } from "lucide-react";
+import jsPDF from "jspdf";
 
 export default function Reports() {
   const { toast } = useToast();
@@ -44,10 +45,10 @@ export default function Reports() {
   });
 
   // Calculate additional metrics
-  const completedProjects = projects?.filter((p: any) => p.status === "completed").length || 0;
-  const inProgressProjects = projects?.filter((p: any) => p.status === "in_progress").length || 0;
-  const pendingTasks = tasks?.filter((t: any) => t.status === "pending").length || 0;
-  const completedTasks = tasks?.filter((t: any) => t.status === "completed").length || 0;
+  const completedProjects = Array.isArray(projects) ? projects.filter((p: any) => p.status === "completed").length : 0;
+  const inProgressProjects = Array.isArray(projects) ? projects.filter((p: any) => p.status === "in_progress").length : 0;
+  const pendingTasks = Array.isArray(tasks) ? tasks.filter((t: any) => t.status === "pending").length : 0;
+  const completedTasks = Array.isArray(tasks) ? tasks.filter((t: any) => t.status === "completed").length : 0;
 
   const generateBusinessReport = () => {
     const reportData = {
@@ -103,7 +104,7 @@ export default function Reports() {
       return;
     }
 
-    const project = projects?.find((p: any) => p.id === parseInt(selectedProjectId));
+    const project = Array.isArray(projects) ? projects.find((p: any) => p.id === parseInt(selectedProjectId)) : null;
     
     if (!project) {
       toast({
@@ -114,7 +115,9 @@ export default function Reports() {
       return;
     }
 
-    const client = clients?.find((c: any) => c.id === project.clientId);
+    const client = Array.isArray(clients) ? clients.find((c: any) => c.id === project.clientId) : null;
+
+    const projectTasks = Array.isArray(tasks) ? tasks.filter((t: any) => t.projectId === project.id) : [];
 
     const clientReportData = {
       projectName: project.name,
@@ -122,35 +125,187 @@ export default function Reports() {
       status: project.status,
       startDate: project.startDate ? new Date(project.startDate).toLocaleDateString() : "N/A",
       endDate: project.endDate ? new Date(project.endDate).toLocaleDateString() : "N/A",
+      dueDate: project.dueDate ? new Date(project.dueDate).toLocaleDateString() : "N/A",
       progress: project.progress || 0,
-      description: project.description || "No description provided"
+      description: project.description || "No description provided",
+      budget: project.budget ? `$${parseFloat(project.budget).toLocaleString()}` : "N/A",
+      tasks: projectTasks
     };
 
-    // Generate client-friendly CSV
-    const csvContent = `Project Report - ${clientReportData.projectName}\n` +
-      `Generated on: ${new Date().toLocaleDateString()}\n\n` +
-      `Client Name,${clientReportData.clientName}\n` +
-      `Project Name,${clientReportData.projectName}\n` +
-      `Status,${clientReportData.status.replace('_', ' ').toUpperCase()}\n` +
-      `Start Date,${clientReportData.startDate}\n` +
-      `Target Completion,${clientReportData.endDate}\n` +
-      `Progress,${clientReportData.progress}%\n` +
-      `Description,${clientReportData.description}\n`;
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `client-report-${project.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    // Generate professional PDF report
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.width;
+    const pageHeight = pdf.internal.pageSize.height;
+    
+    // Header with company branding
+    pdf.setFillColor(59, 130, 246); // Primary blue color
+    pdf.rect(0, 0, pageWidth, 40, 'F');
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(24);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("ContractorFlow", 20, 25);
+    
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("PROJECT EXECUTIVE REPORT", pageWidth - 20, 25, { align: 'right' });
+    
+    // Reset text color for content
+    pdf.setTextColor(0, 0, 0);
+    
+    // Report title and date
+    pdf.setFontSize(20);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(`${clientReportData.projectName} - Project Report`, 20, 65);
+    
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(100, 100, 100);
+    pdf.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 75);
+    
+    // Client Information Section
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("CLIENT INFORMATION", 20, 95);
+    
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`Client Name: ${clientReportData.clientName}`, 20, 110);
+    pdf.text(`Report Date: ${new Date().toLocaleDateString()}`, 20, 120);
+    
+    // Project Overview Section
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("PROJECT OVERVIEW", 20, 145);
+    
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "normal");
+    
+    let yPos = 160;
+    const lineHeight = 10;
+    
+    pdf.text(`Project Name: ${clientReportData.projectName}`, 20, yPos);
+    yPos += lineHeight;
+    
+    // Status with colored indication
+    pdf.text("Status: ", 20, yPos);
+    const statusText = clientReportData.status.replace('_', ' ').toUpperCase();
+    const statusColor = clientReportData.status === 'completed' ? [34, 197, 94] : 
+                       clientReportData.status === 'in_progress' ? [59, 130, 246] : 
+                       clientReportData.status === 'planning' ? [168, 85, 247] : [107, 114, 128];
+    
+    pdf.setTextColor(...statusColor);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(statusText, 45, yPos);
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont("helvetica", "normal");
+    yPos += lineHeight;
+    
+    pdf.text(`Start Date: ${clientReportData.startDate}`, 20, yPos);
+    yPos += lineHeight;
+    pdf.text(`Due Date: ${clientReportData.dueDate}`, 20, yPos);
+    yPos += lineHeight;
+    pdf.text(`Budget: ${clientReportData.budget}`, 20, yPos);
+    yPos += lineHeight * 2;
+    
+    // Progress Section with visual progress bar
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("PROJECT PROGRESS", 20, yPos);
+    yPos += 15;
+    
+    // Progress bar
+    const barWidth = 150;
+    const barHeight = 10;
+    pdf.setFillColor(229, 231, 235); // Gray background
+    pdf.rect(20, yPos, barWidth, barHeight, 'F');
+    
+    const progressWidth = (clientReportData.progress / 100) * barWidth;
+    pdf.setFillColor(34, 197, 94); // Green progress
+    pdf.rect(20, yPos, progressWidth, barHeight, 'F');
+    
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(`${clientReportData.progress}% Complete`, 20, yPos + 25);
+    
+    yPos += 40;
+    
+    // Project Description
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("PROJECT DESCRIPTION", 20, yPos);
+    yPos += 15;
+    
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "normal");
+    const splitDescription = pdf.splitTextToSize(clientReportData.description, pageWidth - 40);
+    pdf.text(splitDescription, 20, yPos);
+    yPos += splitDescription.length * 5 + 20;
+    
+    // Task Summary (if tasks exist)
+    if (clientReportData.tasks.length > 0) {
+      // Check if we need a new page
+      if (yPos > pageHeight - 80) {
+        pdf.addPage();
+        yPos = 20;
+      }
+      
+      pdf.setFontSize(16);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("TASK SUMMARY", 20, yPos);
+      yPos += 15;
+      
+      const completedTasks = clientReportData.tasks.filter((t: any) => t.status === 'completed').length;
+      const totalTasks = clientReportData.tasks.length;
+      
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Total Tasks: ${totalTasks}`, 20, yPos);
+      yPos += lineHeight;
+      pdf.text(`Completed Tasks: ${completedTasks}`, 20, yPos);
+      yPos += lineHeight;
+      pdf.text(`Task Completion Rate: ${totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%`, 20, yPos);
+      yPos += lineHeight * 2;
+      
+      // Recent tasks list (limit to 5)
+      const recentTasks = clientReportData.tasks.slice(0, 5);
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Recent Tasks:", 20, yPos);
+      yPos += 10;
+      
+      recentTasks.forEach((task: any) => {
+        if (yPos > pageHeight - 20) {
+          pdf.addPage();
+          yPos = 20;
+        }
+        
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
+        const taskStatus = task.status.replace('_', ' ').toUpperCase();
+        pdf.text(`• ${task.title} - ${taskStatus}`, 25, yPos);
+        yPos += 8;
+      });
+    }
+    
+    // Footer
+    const footerY = pageHeight - 20;
+    pdf.setFontSize(8);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text("Generated by ContractorFlow - Professional Project Management", 20, footerY);
+    pdf.text(`Page 1 of ${pdf.getNumberOfPages()}`, pageWidth - 20, footerY, { align: 'right' });
+    
+    // Save the PDF
+    const fileName = `${clientReportData.projectName.replace(/\s+/g, '-').toLowerCase()}-executive-report-${new Date().toISOString().split('T')[0]}.pdf`;
+    pdf.save(fileName);
 
     setIsClientReportDialogOpen(false);
     setSelectedProjectId("");
     
     toast({
-      title: "Client Report Generated",
-      description: `Report for ${project.name} has been downloaded`,
+      title: "Executive Report Generated",
+      description: "Professional PDF report has been downloaded successfully",
     });
   };
 
