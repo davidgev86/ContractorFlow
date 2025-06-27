@@ -304,6 +304,69 @@ export default function Projects() {
     },
   });
 
+  const updateProjectStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      await apiRequest("PUT", `/api/projects/${id}`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      toast({
+        title: "Success",
+        description: "Project status updated successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Project status update error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update project status",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateTaskStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      await apiRequest("PUT", `/api/tasks/${id}`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      toast({
+        title: "Success",
+        description: "Task status updated successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Task status update error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update task status",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateRequestStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      return apiRequest("PUT", `/api/update-requests/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/update-requests"] });
+      toast({
+        title: "Success",
+        description: "Request status updated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update request status",
+        variant: "destructive",
+      });
+    },
+  });
+
   const editForm = useForm<z.infer<typeof projectFormSchema>>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
@@ -854,9 +917,24 @@ export default function Projects() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-slate-600">Status</span>
-                        <Badge className={getStatusColor(project.status)}>
-                          {project.status.replace("_", " ").replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                        </Badge>
+                        <Select
+                          value={project.status}
+                          onValueChange={(status) => updateProjectStatusMutation.mutate({ id: project.id, status })}
+                        >
+                          <SelectTrigger className="w-32 h-7">
+                            <SelectValue>
+                              <Badge className={getStatusColor(project.status)}>
+                                {project.status.replace("_", " ").replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                              </Badge>
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="planning">Planning</SelectItem>
+                            <SelectItem value="in_progress">In Progress</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                            <SelectItem value="on_hold">On Hold</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       
                       {project.budget && (
@@ -1145,9 +1223,24 @@ export default function Projects() {
                               <div className="flex-1">
                                 <CardTitle className="text-lg mb-2">{task.title}</CardTitle>
                                 <div className="flex items-center space-x-4 text-sm text-slate-500 mb-3">
-                                  <Badge className={getTaskStatusColor(task.status)}>
-                                    {task.status.replace("_", " ").replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                                  </Badge>
+                                  <Select
+                                    value={task.status}
+                                    onValueChange={(status) => updateTaskStatusMutation.mutate({ id: task.id, status })}
+                                  >
+                                    <SelectTrigger className="w-32 h-7">
+                                      <SelectValue>
+                                        <Badge className={getTaskStatusColor(task.status)}>
+                                          {task.status.replace("_", " ").replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                        </Badge>
+                                      </SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="in_progress">In Progress</SelectItem>
+                                      <SelectItem value="completed">Completed</SelectItem>
+                                      <SelectItem value="blocked">Blocked</SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                   <Badge variant="outline" className={getTaskPriorityColor(task.priority)}>
                                     {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
                                   </Badge>
