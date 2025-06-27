@@ -44,6 +44,10 @@ export default function Reports() {
     queryKey: ["/api/tasks"],
   });
 
+  const { data: projectUpdates } = useQuery({
+    queryKey: ["/api/project-updates"],
+  });
+
   // Calculate additional metrics
   const completedProjects = Array.isArray(projects) ? projects.filter((p: any) => p.status === "completed").length : 0;
   const inProgressProjects = Array.isArray(projects) ? projects.filter((p: any) => p.status === "in_progress").length : 0;
@@ -118,6 +122,7 @@ export default function Reports() {
     const client = Array.isArray(clients) ? clients.find((c: any) => c.id === project.clientId) : null;
 
     const projectTasks = Array.isArray(tasks) ? tasks.filter((t: any) => t.projectId === project.id) : [];
+    const projectPhotoUpdates = Array.isArray(projectUpdates) ? projectUpdates.filter((u: any) => u.projectId === project.id && u.imageUrl) : [];
 
     const clientReportData = {
       projectName: project.name,
@@ -130,7 +135,8 @@ export default function Reports() {
       progress: project.progress || 0,
       description: project.description || "No description provided",
       budget: project.budget ? `$${parseFloat(project.budget).toLocaleString()}` : "N/A",
-      tasks: projectTasks
+      tasks: projectTasks,
+      photos: projectPhotoUpdates
     };
 
     // Generate professional PDF report
@@ -213,12 +219,12 @@ export default function Reports() {
     // Project Overview Section
     pdf.setFontSize(16);
     pdf.setFont("helvetica", "bold");
-    pdf.text("PROJECT OVERVIEW", 20, 170);
+    pdf.text("PROJECT OVERVIEW", 20, 180);
     
     pdf.setFontSize(11);
     pdf.setFont("helvetica", "normal");
     
-    let yPos = 185;
+    let yPos = 195;
     const lineHeight = 10;
     
     pdf.text(`Project Name: ${clientReportData.projectName}`, 20, yPos);
@@ -329,6 +335,57 @@ export default function Reports() {
         pdf.text(`• ${task.title} - ${taskStatus}`, 25, yPos);
         yPos += 8;
       });
+    }
+    
+    // Project Photos Section
+    if (clientReportData.photos.length > 0) {
+      // Check if we need a new page for photos
+      if (yPos > pageHeight - 120) {
+        pdf.addPage();
+        yPos = 20;
+      }
+      
+      pdf.setFontSize(16);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("PROJECT PHOTOS", 20, yPos);
+      yPos += 15;
+      
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`${clientReportData.photos.length} photo(s) available in project updates.`, 20, yPos);
+      yPos += 10;
+      
+      // Note about photos (since we can't easily embed them in PDF)
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text("Photos are available in your project dashboard and client portal.", 20, yPos);
+      yPos += 8;
+      
+      // List photo updates with dates
+      const photoList = clientReportData.photos.slice(0, 3); // Show first 3 photos
+      photoList.forEach((update: any, index: number) => {
+        if (yPos > pageHeight - 80) {
+          pdf.addPage();
+          yPos = 20;
+        }
+        
+        const updateDate = update.createdAt ? new Date(update.createdAt).toLocaleDateString() : "N/A";
+        pdf.setFontSize(9);
+        pdf.setTextColor(80, 80, 80);
+        pdf.text(`${index + 1}. Photo update from ${updateDate}`, 25, yPos);
+        if (update.content) {
+          yPos += 6;
+          const splitContent = pdf.splitTextToSize(update.content, pageWidth - 50);
+          pdf.text(splitContent.slice(0, 2), 30, yPos); // Show first 2 lines only
+          yPos += Math.min(splitContent.length, 2) * 4;
+        }
+        yPos += 8;
+      });
+      
+      if (clientReportData.photos.length > 3) {
+        pdf.text(`... and ${clientReportData.photos.length - 3} more photos in your project dashboard.`, 25, yPos);
+        yPos += 8;
+      }
     }
     
     // Compact professional footer - positioned to avoid cutoff
