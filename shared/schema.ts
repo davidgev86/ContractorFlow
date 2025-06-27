@@ -51,6 +51,7 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
+  siteAddress: text("site_address"), // Job site address
   clientId: integer("client_id").notNull(),
   userId: varchar("user_id").notNull(),
   status: varchar("status").default("planning"), // "planning", "in_progress", "completed", "on_hold"

@@ -122,6 +122,7 @@ export default function Reports() {
     const clientReportData = {
       projectName: project.name,
       clientName: client?.name || "N/A",
+      siteAddress: project.siteAddress || "N/A",
       status: project.status,
       startDate: project.startDate ? new Date(project.startDate).toLocaleDateString() : "N/A",
       endDate: project.endDate ? new Date(project.endDate).toLocaleDateString() : "N/A",
@@ -206,7 +207,8 @@ export default function Reports() {
     pdf.setFontSize(11);
     pdf.setFont("helvetica", "normal");
     pdf.text(`Client Name: ${clientReportData.clientName}`, 20, 140);
-    pdf.text(`Report Date: ${new Date().toLocaleDateString()}`, 20, 150);
+    pdf.text(`Site Address: ${clientReportData.siteAddress}`, 20, 150);
+    pdf.text(`Report Date: ${new Date().toLocaleDateString()}`, 20, 160);
     
     // Project Overview Section
     pdf.setFontSize(16);

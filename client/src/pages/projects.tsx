@@ -166,6 +166,7 @@ export default function Projects() {
     defaultValues: {
       name: "",
       description: "",
+      siteAddress: "",
       status: "planning",
       budget: "",
       progress: 0,
@@ -645,6 +646,26 @@ export default function Projects() {
                             <Textarea 
                               placeholder="Complete kitchen renovation including..."
                               className="resize-none"
+                              {...field}
+                              value={field.value ?? ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="siteAddress"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Site Address</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="123 Main Street, Anytown, NY 12345"
+                              className="resize-none"
+                              rows={2}
                               {...field}
                               value={field.value ?? ""}
                             />
