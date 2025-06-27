@@ -52,18 +52,18 @@ export default function Reports() {
 
   const generateBusinessReport = () => {
     const reportData = {
-      totalRevenue: stats?.revenueMTD || "$0",
-      activeProjects: stats?.activeProjects || 0,
-      totalClients: clients?.length || 0,
-      completionRate: tasks?.length ? Math.round((completedTasks / tasks.length) * 100) : 0,
+      totalRevenue: (stats as any)?.revenueMTD || "$0",
+      activeProjects: (stats as any)?.activeProjects || 0,
+      totalClients: Array.isArray(clients) ? clients.length : 0,
+      completionRate: Array.isArray(tasks) && tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0,
       projectBreakdown: {
-        planning: projects?.filter((p: any) => p.status === "planning").length || 0,
+        planning: Array.isArray(projects) ? projects.filter((p: any) => p.status === "planning").length : 0,
         inProgress: inProgressProjects,
         completed: completedProjects,
-        onHold: projects?.filter((p: any) => p.status === "on_hold").length || 0
+        onHold: Array.isArray(projects) ? projects.filter((p: any) => p.status === "on_hold").length : 0
       },
-      expenses: stats?.expenses || "$0",
-      profit: stats?.profit || "$0"
+      expenses: (stats as any)?.expenses || "$0",
+      profit: (stats as any)?.profit || "$0"
     };
 
     // Generate CSV format
@@ -191,11 +191,11 @@ export default function Reports() {
     // Status with colored indication
     pdf.text("Status: ", 20, yPos);
     const statusText = clientReportData.status.replace('_', ' ').toUpperCase();
-    const statusColor = clientReportData.status === 'completed' ? [34, 197, 94] : 
-                       clientReportData.status === 'in_progress' ? [59, 130, 246] : 
-                       clientReportData.status === 'planning' ? [168, 85, 247] : [107, 114, 128];
+    const statusColor = clientReportData.status === 'completed' ? [34, 197, 94] as [number, number, number] : 
+                       clientReportData.status === 'in_progress' ? [59, 130, 246] as [number, number, number] : 
+                       clientReportData.status === 'planning' ? [168, 85, 247] as [number, number, number] : [107, 114, 128] as [number, number, number];
     
-    pdf.setTextColor(...statusColor);
+    pdf.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
     pdf.setFont("helvetica", "bold");
     pdf.text(statusText, 45, yPos);
     pdf.setTextColor(0, 0, 0);
@@ -345,8 +345,8 @@ export default function Reports() {
                           <SelectValue placeholder="Choose a project" />
                         </SelectTrigger>
                         <SelectContent>
-                          {projects?.map((project: any) => {
-                            const client = clients?.find((c: any) => c.id === project.clientId);
+                          {Array.isArray(projects) && projects.map((project: any) => {
+                            const client = Array.isArray(clients) ? clients.find((c: any) => c.id === project.clientId) : null;
                             return (
                               <SelectItem key={project.id} value={project.id.toString()}>
                                 {project.name} {client ? `(${client.name})` : ''}
