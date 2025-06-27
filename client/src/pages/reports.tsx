@@ -139,82 +139,84 @@ export default function Reports() {
     
     // Enhanced header with comprehensive branding
     pdf.setFillColor(59, 130, 246); // Primary blue color
-    pdf.rect(0, 0, pageWidth, 55, 'F');
+    pdf.rect(0, 0, pageWidth, 50, 'F');
     
-    // Company name and tagline
+    // Company name
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(26);
+    pdf.setFontSize(24);
     pdf.setFont("helvetica", "bold");
-    pdf.text("ContractorFlow", 20, 25);
+    pdf.text("ContractorFlow", 20, 22);
     
-    pdf.setFontSize(11);
+    // Tagline
+    pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
-    pdf.text("Professional Project Management Solutions", 20, 33);
+    pdf.text("Professional Project Management Solutions", 20, 30);
     
-    // Contact information
-    pdf.setFontSize(9);
-    pdf.text("📧 support@contractorflow.com | 📱 (555) 123-4567 | 🌐 www.contractorflow.com", 20, 41);
+    // Contact information on separate lines for better readability
+    pdf.setFontSize(8);
+    pdf.text("Email: support@contractorflow.com", 20, 37);
+    pdf.text("Phone: (555) 123-4567", 20, 43);
     
     // Report type aligned to right
-    pdf.setFontSize(14);
+    pdf.setFontSize(12);
     pdf.setFont("helvetica", "bold");
-    pdf.text("PROJECT EXECUTIVE REPORT", pageWidth - 20, 30, { align: 'right' });
+    pdf.text("PROJECT EXECUTIVE REPORT", pageWidth - 20, 25, { align: 'right' });
     
-    // Decorative line
-    pdf.setDrawColor(255, 255, 255);
-    pdf.setLineWidth(1);
-    pdf.line(20, 48, pageWidth - 20, 48);
+    // Website aligned to right
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("www.contractorflow.com", pageWidth - 20, 40, { align: 'right' });
     
     // Reset text color for content
     pdf.setTextColor(0, 0, 0);
     
     // Report title and date with enhanced spacing
-    pdf.setFontSize(20);
+    pdf.setFontSize(18);
     pdf.setFont("helvetica", "bold");
-    pdf.text(`${clientReportData.projectName} - Project Report`, 20, 70);
+    pdf.text(`${clientReportData.projectName} - Project Report`, 20, 65);
     
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
     pdf.setTextColor(100, 100, 100);
-    pdf.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 80);
-    pdf.text(`Report ID: CR-${Date.now().toString().slice(-6)}`, 20, 88);
+    pdf.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 75);
+    pdf.text(`Report ID: CR-${Date.now().toString().slice(-6)}`, 20, 82);
     
     // Company information box
     pdf.setDrawColor(59, 130, 246);
     pdf.setLineWidth(1);
-    pdf.rect(20, 95, pageWidth - 40, 25);
+    pdf.rect(20, 90, pageWidth - 40, 22);
     
     pdf.setFontSize(9);
     pdf.setTextColor(59, 130, 246);
     pdf.setFont("helvetica", "bold");
-    pdf.text("About ContractorFlow:", 25, 105);
+    pdf.text("About ContractorFlow:", 25, 100);
     
     pdf.setFontSize(8);
     pdf.setTextColor(80, 80, 80);
     pdf.setFont("helvetica", "normal");
-    pdf.text("Leading provider of project management solutions for contractors and construction professionals.", 25, 112);
-    pdf.text("Trusted by thousands of contractors nationwide for streamlined project delivery and client communication.", 25, 118);
+    pdf.text("Leading provider of project management solutions for contractors and construction professionals.", 25, 106);
+    pdf.text("Trusted by thousands of contractors nationwide for streamlined project delivery.", 25, 110);
     
     // Client Information Section
     pdf.setTextColor(0, 0, 0);
     pdf.setFontSize(16);
     pdf.setFont("helvetica", "bold");
-    pdf.text("CLIENT INFORMATION", 20, 135);
+    pdf.text("CLIENT INFORMATION", 20, 125);
     
     pdf.setFontSize(11);
     pdf.setFont("helvetica", "normal");
-    pdf.text(`Client Name: ${clientReportData.clientName}`, 20, 150);
-    pdf.text(`Report Date: ${new Date().toLocaleDateString()}`, 20, 160);
+    pdf.text(`Client Name: ${clientReportData.clientName}`, 20, 140);
+    pdf.text(`Report Date: ${new Date().toLocaleDateString()}`, 20, 150);
     
     // Project Overview Section
     pdf.setFontSize(16);
     pdf.setFont("helvetica", "bold");
-    pdf.text("PROJECT OVERVIEW", 20, 180);
+    pdf.text("PROJECT OVERVIEW", 20, 170);
     
     pdf.setFontSize(11);
     pdf.setFont("helvetica", "normal");
     
-    let yPos = 195;
+    let yPos = 185;
     const lineHeight = 10;
     
     pdf.text(`Project Name: ${clientReportData.projectName}`, 20, yPos);
