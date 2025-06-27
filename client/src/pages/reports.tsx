@@ -265,6 +265,12 @@ export default function Reports() {
     
     yPos += 40;
     
+    // Check if we need a new page before adding description
+    if (yPos > pageHeight - 100) {
+      pdf.addPage();
+      yPos = 20;
+    }
+    
     // Project Description
     pdf.setFontSize(16);
     pdf.setFont("helvetica", "bold");
@@ -280,7 +286,7 @@ export default function Reports() {
     // Task Summary (if tasks exist)
     if (clientReportData.tasks.length > 0) {
       // Check if we need a new page
-      if (yPos > pageHeight - 80) {
+      if (yPos > pageHeight - 120) {
         pdf.addPage();
         yPos = 20;
       }
@@ -310,7 +316,7 @@ export default function Reports() {
       yPos += 10;
       
       recentTasks.forEach((task: any) => {
-        if (yPos > pageHeight - 60) { // Increased margin to prevent footer overlap
+        if (yPos > pageHeight - 80) { // Increased margin to prevent footer overlap
           pdf.addPage();
           yPos = 20;
         }
@@ -323,28 +329,26 @@ export default function Reports() {
       });
     }
     
-    // Professional footer with branding - positioned higher to avoid cutoff
-    const footerY = pageHeight - 40;
+    // Compact professional footer - positioned to avoid cutoff
+    const footerY = pageHeight - 25;
     
     // Footer separator line
     pdf.setDrawColor(200, 200, 200);
     pdf.setLineWidth(0.5);
-    pdf.line(20, footerY - 5, pageWidth - 20, footerY - 5);
+    pdf.line(20, footerY - 3, pageWidth - 20, footerY - 3);
     
-    // Company branding in footer
-    pdf.setFontSize(9);
+    // Company branding in footer - more compact
+    pdf.setFontSize(8);
     pdf.setTextColor(59, 130, 246); // Brand blue
     pdf.setFont("helvetica", "bold");
-    pdf.text("ContractorFlow", 20, footerY + 3);
+    pdf.text("ContractorFlow - Professional Project Management Solutions", 20, footerY + 3);
     
-    pdf.setFontSize(8);
+    pdf.setFontSize(7);
     pdf.setTextColor(100, 100, 100);
     pdf.setFont("helvetica", "normal");
-    pdf.text("Professional Project Management Solutions", 20, footerY + 10);
-    pdf.text("This report is confidential and intended for client use only.", 20, footerY + 16);
+    pdf.text("Confidential Report | Generated: " + new Date().toLocaleDateString(), 20, footerY + 10);
     
-    // Page number and generation date
-    pdf.text(`Generated: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, pageWidth - 20, footerY + 3, { align: 'right' });
+    // Page number aligned to right
     pdf.text(`Page 1 of ${pdf.getNumberOfPages()}`, pageWidth - 20, footerY + 10, { align: 'right' });
     
     // Save the PDF
