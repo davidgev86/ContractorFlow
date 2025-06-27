@@ -84,7 +84,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/projects", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const validatedData = insertProjectSchema.parse({ ...req.body, userId });
+      
+      // Handle empty date fields by converting empty strings to null
+      const processedBody = { ...req.body };
+      if (processedBody.startDate === "") processedBody.startDate = null;
+      if (processedBody.endDate === "") processedBody.endDate = null;
+      if (processedBody.dueDate === "") processedBody.dueDate = null;
+      
+      const validatedData = insertProjectSchema.parse({ ...processedBody, userId });
       const project = await storage.createProject(validatedData);
       res.json(project);
     } catch (error: any) {
@@ -112,7 +119,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const id = parseInt(req.params.id);
-      const project = await storage.updateProject(id, userId, req.body);
+      
+      // Handle empty date fields by converting empty strings to null
+      const processedBody = { ...req.body };
+      if (processedBody.startDate === "") processedBody.startDate = null;
+      if (processedBody.endDate === "") processedBody.endDate = null;
+      if (processedBody.dueDate === "") processedBody.dueDate = null;
+      
+      const project = await storage.updateProject(id, userId, processedBody);
       res.json(project);
     } catch (error) {
       console.error("Error updating project:", error);
