@@ -153,26 +153,6 @@ export default function Projects() {
     projectId: z.number(),
   });
 
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      return apiRequest("PUT", `/api/update-requests/${id}/status`, { status });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/update-requests"] });
-      toast({
-        title: "Success",
-        description: "Request status updated successfully",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update request status",
-        variant: "destructive",
-      });
-    },
-  });
-
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
   });
@@ -459,7 +439,7 @@ export default function Projects() {
   };
 
   const handleStatusChange = (id: number, status: string) => {
-    updateStatusMutation.mutate({ id, status });
+    updateRequestStatusMutation.mutate({ id, status });
   };
 
   const replyMutation = useMutation({
@@ -1411,7 +1391,7 @@ export default function Projects() {
                                 <Select
                                   value={request.status}
                                   onValueChange={(status) => handleStatusChange(request.id, status)}
-                                  disabled={updateStatusMutation.isPending}
+                                  disabled={updateRequestStatusMutation.isPending}
                                 >
                                   <SelectTrigger className="w-32">
                                     <SelectValue />
