@@ -310,7 +310,7 @@ export default function Reports() {
       yPos += 10;
       
       recentTasks.forEach((task: any) => {
-        if (yPos > pageHeight - 20) {
+        if (yPos > pageHeight - 60) { // Increased margin to prevent footer overlap
           pdf.addPage();
           yPos = 20;
         }
@@ -323,8 +323,8 @@ export default function Reports() {
       });
     }
     
-    // Professional footer with branding
-    const footerY = pageHeight - 30;
+    // Professional footer with branding - positioned higher to avoid cutoff
+    const footerY = pageHeight - 40;
     
     // Footer separator line
     pdf.setDrawColor(200, 200, 200);
@@ -335,17 +335,17 @@ export default function Reports() {
     pdf.setFontSize(9);
     pdf.setTextColor(59, 130, 246); // Brand blue
     pdf.setFont("helvetica", "bold");
-    pdf.text("ContractorFlow", 20, footerY + 5);
+    pdf.text("ContractorFlow", 20, footerY + 3);
     
     pdf.setFontSize(8);
     pdf.setTextColor(100, 100, 100);
     pdf.setFont("helvetica", "normal");
-    pdf.text("Professional Project Management Solutions", 20, footerY + 12);
-    pdf.text("This report is confidential and intended for client use only.", 20, footerY + 18);
+    pdf.text("Professional Project Management Solutions", 20, footerY + 10);
+    pdf.text("This report is confidential and intended for client use only.", 20, footerY + 16);
     
     // Page number and generation date
-    pdf.text(`Generated: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, pageWidth - 20, footerY + 5, { align: 'right' });
-    pdf.text(`Page 1 of ${pdf.getNumberOfPages()}`, pageWidth - 20, footerY + 12, { align: 'right' });
+    pdf.text(`Generated: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, pageWidth - 20, footerY + 3, { align: 'right' });
+    pdf.text(`Page 1 of ${pdf.getNumberOfPages()}`, pageWidth - 20, footerY + 10, { align: 'right' });
     
     // Save the PDF
     const fileName = `${clientReportData.projectName.replace(/\s+/g, '-').toLowerCase()}-executive-report-${new Date().toISOString().split('T')[0]}.pdf`;
