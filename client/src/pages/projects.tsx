@@ -591,145 +591,148 @@ export default function Projects() {
                   New Project
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create New Project</DialogTitle>
                 </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Project Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Kitchen Remodel - Johnson Home" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="clientId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Client</FormLabel>
-                          <Select onValueChange={(value) => field.onChange(parseInt(value))}>
+                <div className="flex-1 overflow-y-auto">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Project Name</FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a client" />
-                              </SelectTrigger>
+                              <Input placeholder="Kitchen Remodel - Johnson Home" {...field} />
                             </FormControl>
-                            <SelectContent>
-                              {clients?.map((client: any) => (
-                                <SelectItem key={client.id} value={client.id.toString()}>
-                                  {client.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="clientId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Client</FormLabel>
+                            <Select onValueChange={(value) => field.onChange(parseInt(value))}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a client" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {clients?.map((client: any) => (
+                                  <SelectItem key={client.id} value={client.id.toString()}>
+                                    {client.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Complete kitchen renovation including..."
+                                className="resize-none"
+                                {...field}
+                                value={field.value ?? ""}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="siteAddress"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Site Address</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="123 Main Street, Anytown, NY 12345"
+                                className="resize-none"
+                                rows={2}
+                                {...field}
+                                value={field.value ?? ""}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="budget"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Budget</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="12500" 
+                                {...field}
+                                value={field.value ?? ""}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="dueDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Due Date</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Complete kitchen renovation including..."
-                              className="resize-none"
-                              {...field}
-                              value={field.value ?? ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="siteAddress"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Site Address</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="123 Main Street, Anytown, NY 12345"
-                              className="resize-none"
-                              rows={2}
-                              {...field}
-                              value={field.value ?? ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="budget"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Budget</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              placeholder="12500" 
-                              {...field}
-                              value={field.value ?? ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="dueDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Due Date</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="flex justify-end space-x-2 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={createProjectMutation.isPending}>
-                        {createProjectMutation.isPending ? "Creating..." : "Create Project"}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
+                      <div className="flex justify-end space-x-2 pt-4">
+                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={createProjectMutation.isPending}>
+                          {createProjectMutation.isPending ? "Creating..." : "Create Project"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </div>
               </DialogContent>
             </Dialog>
 
             {/* Edit Project Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Edit Project</DialogTitle>
                 </DialogHeader>
-                <Form {...editForm}>
-                  <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
-                    <FormField
+                <div className="flex-1 overflow-y-auto">
+                  <Form {...editForm}>
+                    <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+                      <FormField
                       control={editForm.control}
                       name="name"
                       render={({ field }) => (
@@ -791,6 +794,7 @@ export default function Projects() {
                     </div>
                   </form>
                 </Form>
+                </div>
               </DialogContent>
             </Dialog>
           </div>
