@@ -162,6 +162,11 @@ export default function Projects() {
     queryKey: ["/api/auth/user"],
   });
 
+  const { data: qbStatus } = useQuery({
+    queryKey: ["/api/quickbooks/status"],
+    enabled: user?.planType === 'pro',
+  });
+
   const form = useForm<z.infer<typeof projectFormSchema>>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
@@ -922,6 +927,15 @@ export default function Projects() {
                             <Edit className="w-4 h-4 mr-2" />
                             Edit Project
                           </DropdownMenuItem>
+                          {user?.planType === 'pro' && qbStatus?.connected && (
+                            <DropdownMenuItem 
+                              onClick={() => syncToQuickBooksMutation.mutate(project.id)}
+                              disabled={syncToQuickBooksMutation.isPending}
+                            >
+                              <Building className="w-4 h-4 mr-2" />
+                              {syncToQuickBooksMutation.isPending ? 'Syncing...' : 'Sync to QuickBooks'}
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
                             onClick={() => {
