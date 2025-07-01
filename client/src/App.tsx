@@ -20,6 +20,7 @@ import ClientPortalSetup from "@/pages/client-portal-setup";
 import ClientPortalForgotPassword from "@/pages/client-portal-forgot-password";
 import ClientPortalResetPassword from "@/pages/client-portal-reset-password";
 import Settings from "@/pages/settings";
+import QuickBooksCallback from "@/pages/quickbooks-callback";
 
 import NotFound from "@/pages/not-found";
 
@@ -47,6 +48,7 @@ function Router() {
           <Route path="/client-portal-setup" component={ClientPortalSetup} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/settings" component={Settings} />
+          <Route path="/quickbooks/callback" component={QuickBooksCallback} />
         </>
       )}
       {/* Client Portal Routes - Public */}
