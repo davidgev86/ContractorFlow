@@ -25,7 +25,8 @@ import {
   BarChart3,
   FileText,
   ExternalLink,
-  MessageSquare
+  MessageSquare,
+  Settings
 } from "lucide-react";
 
 export function Navigation() {
@@ -40,6 +41,7 @@ export function Navigation() {
     { path: "/reports", label: "Reports", icon: BarChart3 },
     { path: "/project-updates", label: "Updates", icon: FileText },
     { path: "/client-portal-setup", label: "Portal", icon: ExternalLink },
+    { path: "/settings", label: "Settings", icon: Settings },
   ];
 
   const isActive = (path: string) => {

@@ -38,7 +38,8 @@ import {
   AlertCircle,
   User,
   FolderOpen,
-  Send
+  Send,
+  Building
 } from "lucide-react";
 import { z } from "zod";
 
@@ -343,6 +344,25 @@ export default function Projects() {
       toast({
         title: "Error",
         description: "Failed to update request status",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const syncToQuickBooksMutation = useMutation({
+    mutationFn: async (projectId: number) => {
+      return apiRequest("POST", `/api/quickbooks/sync-project/${projectId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Project synced to QuickBooks successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync project to QuickBooks",
         variant: "destructive",
       });
     },

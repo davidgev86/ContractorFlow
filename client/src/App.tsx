@@ -19,6 +19,7 @@ import ProjectUpdates from "@/pages/project-updates";
 import ClientPortalSetup from "@/pages/client-portal-setup";
 import ClientPortalForgotPassword from "@/pages/client-portal-forgot-password";
 import ClientPortalResetPassword from "@/pages/client-portal-reset-password";
+import Settings from "@/pages/settings";
 
 import NotFound from "@/pages/not-found";
 
@@ -45,6 +46,7 @@ function Router() {
           <Route path="/project-updates" component={ProjectUpdates} />
           <Route path="/client-portal-setup" component={ClientPortalSetup} />
           <Route path="/checkout" component={Checkout} />
+          <Route path="/settings" component={Settings} />
         </>
       )}
       {/* Client Portal Routes - Public */}
