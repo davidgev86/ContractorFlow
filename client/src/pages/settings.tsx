@@ -42,7 +42,7 @@ export default function Settings() {
 
   // Connect to QuickBooks mutation
   const connectMutation = useMutation({
-    mutationFn: () => apiRequest('/api/quickbooks/connect', { method: 'POST' }),
+    mutationFn: () => apiRequest('POST', '/api/quickbooks/connect'),
     onSuccess: (data) => {
       setIsConnecting(true);
       // Redirect to QuickBooks authorization
@@ -59,7 +59,7 @@ export default function Settings() {
 
   // Disconnect from QuickBooks mutation
   const disconnectMutation = useMutation({
-    mutationFn: () => apiRequest('/api/quickbooks/disconnect', { method: 'POST' }),
+    mutationFn: () => apiRequest('POST', '/api/quickbooks/disconnect'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quickbooks/status"] });
       queryClient.invalidateQueries({ queryKey: ["/api/quickbooks/company"] });
