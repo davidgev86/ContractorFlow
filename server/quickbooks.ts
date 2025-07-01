@@ -1,3 +1,4 @@
+// @ts-ignore
 import QuickBooks from 'node-quickbooks';
 import { Request, Response } from 'express';
 import { storage } from './storage';

@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
+import { QuickBooksService, getQuickBooksService } from "./quickbooks";
 import { projectUpdates, projectPhotos, updateRequests } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { insertProjectSchema, insertClientSchema, insertTaskSchema, insertBudgetItemSchema } from "@shared/schema";
@@ -746,6 +747,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Update request status error:", error);
       res.status(500).json({ message: "Failed to update status" });
+    }
+  });
+
+  // QuickBooks Integration Routes
+  
+  // Get QuickBooks connection status
+  app.get('/api/quickbooks/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user has Pro plan
+      if (user.planType !== 'pro') {
+        return res.status(403).json({ 
+          message: "QuickBooks integration is only available for Pro plan users",
+          requiresUpgrade: true
+        });
+      }
+
+      res.json({
+        connected: user.quickbooksConnected || false,
+        companyId: user.quickbooksCompanyId,
+        realmId: user.quickbooksRealmId
+      });
+    } catch (error) {
+      console.error("QuickBooks status error:", error);
+      res.status(500).json({ message: "Failed to get QuickBooks status" });
+    }
+  });
+
+  // Initiate QuickBooks connection
+  app.post('/api/quickbooks/connect', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user has Pro plan
+      if (user.planType !== 'pro') {
+        return res.status(403).json({ 
+          message: "QuickBooks integration is only available for Pro plan users",
+          requiresUpgrade: true
+        });
+      }
+
+      const authUrl = QuickBooksService.getAuthorizationUrl(userId);
+      res.json({ authUrl });
+    } catch (error) {
+      console.error("QuickBooks connect error:", error);
+      res.status(500).json({ message: "Failed to initiate QuickBooks connection" });
+    }
+  });
+
+  // QuickBooks OAuth callback
+  app.get('/api/quickbooks/callback', QuickBooksService.handleCallback);
+
+  // Disconnect QuickBooks
+  app.post('/api/quickbooks/disconnect', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await QuickBooksService.disconnect(userId);
+      res.json({ message: "QuickBooks disconnected successfully" });
+    } catch (error) {
+      console.error("QuickBooks disconnect error:", error);
+      res.status(500).json({ message: "Failed to disconnect QuickBooks" });
+    }
+  });
+
+  // Sync project to QuickBooks
+  app.post('/api/quickbooks/sync-project/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const projectId = parseInt(req.params.id);
+
+      const user = await storage.getUser(userId);
+      if (!user || user.planType !== 'pro') {
+        return res.status(403).json({ message: "QuickBooks sync requires Pro plan" });
+      }
+
+      const project = await storage.getProject(projectId, userId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      const client = await storage.getClient(project.clientId, userId);
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      const budgetItems = await storage.getBudgetItems(userId, projectId);
+      
+      const qbService = await getQuickBooksService(userId);
+      if (!qbService) {
+        return res.status(400).json({ message: "QuickBooks not connected" });
+      }
+
+      const estimateId = await qbService.syncProject(project, client, budgetItems);
+      
+      if (estimateId) {
+        res.json({ 
+          message: "Project synced to QuickBooks successfully",
+          estimateId
+        });
+      } else {
+        res.status(500).json({ message: "Failed to sync project to QuickBooks" });
+      }
+    } catch (error) {
+      console.error("QuickBooks sync error:", error);
+      res.status(500).json({ message: "Failed to sync project to QuickBooks" });
+    }
+  });
+
+  // Get QuickBooks company info
+  app.get('/api/quickbooks/company', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.planType !== 'pro') {
+        return res.status(403).json({ message: "QuickBooks integration requires Pro plan" });
+      }
+
+      const qbService = await getQuickBooksService(userId);
+      if (!qbService) {
+        return res.status(400).json({ message: "QuickBooks not connected" });
+      }
+
+      const companyInfo = await qbService.getCompanyInfo();
+      res.json(companyInfo);
+    } catch (error) {
+      console.error("QuickBooks company info error:", error);
+      res.status(500).json({ message: "Failed to get company information" });
     }
   });
 
