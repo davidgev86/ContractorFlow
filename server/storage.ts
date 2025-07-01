@@ -41,6 +41,14 @@ export interface IStorage {
     stripeCustomerId?: string;
     stripeSubscriptionId?: string;
   }): Promise<User>;
+  updateUserQuickBooks(id: string, data: {
+    quickbooksConnected?: boolean;
+    quickbooksCompanyId?: string | null;
+    quickbooksAccessToken?: string | null;
+    quickbooksRefreshToken?: string | null;
+    quickbooksTokenExpiry?: Date | null;
+    quickbooksRealmId?: string | null;
+  }): Promise<User>;
   
   // Project operations
   getProjects(userId: string): Promise<Project[]>;
@@ -132,6 +140,22 @@ export class DatabaseStorage implements IStorage {
     subscriptionActive?: boolean;
     stripeCustomerId?: string;
     stripeSubscriptionId?: string;
+  }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserQuickBooks(id: string, data: {
+    quickbooksConnected?: boolean;
+    quickbooksCompanyId?: string | null;
+    quickbooksAccessToken?: string | null;
+    quickbooksRefreshToken?: string | null;
+    quickbooksTokenExpiry?: Date | null;
+    quickbooksRealmId?: string | null;
   }): Promise<User> {
     const [user] = await db
       .update(users)

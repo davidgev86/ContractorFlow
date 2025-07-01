@@ -42,6 +42,14 @@ export const users = pgTable("users", {
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   
+  // QuickBooks integration fields
+  quickbooksConnected: boolean("quickbooks_connected").default(false),
+  quickbooksCompanyId: varchar("quickbooks_company_id"),
+  quickbooksAccessToken: text("quickbooks_access_token"),
+  quickbooksRefreshToken: text("quickbooks_refresh_token"),
+  quickbooksTokenExpiry: timestamp("quickbooks_token_expiry"),
+  quickbooksRealmId: varchar("quickbooks_realm_id"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
