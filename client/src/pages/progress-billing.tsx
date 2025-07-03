@@ -22,6 +22,7 @@ const milestoneFormSchema = insertProgressBillingMilestoneSchema.extend({
   projectId: z.number(),
 }).omit({
   completedAt: true,
+  userId: true,
 });
 
 type MilestoneFormData = z.infer<typeof milestoneFormSchema>;
