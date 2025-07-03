@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { insertProgressBillingMilestoneSchema } from "@shared/schema";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
@@ -398,9 +399,51 @@ export default function ProgressBilling() {
                           <CardTitle className="flex items-center gap-2">
                             <StatusIcon className="w-5 h-5" />
                             {milestone.title}
-                            <Badge className={statusColors[milestone.status as keyof typeof statusColors]}>
-                              {milestone.status.replace('_', ' ')}
-                            </Badge>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors cursor-pointer hover:opacity-80 ${statusColors[milestone.status as keyof typeof statusColors]}`}>
+                                  {milestone.status.replace('_', ' ')}
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem 
+                                  onClick={() => updateMilestoneStatusMutation.mutate({
+                                    id: milestone.id, 
+                                    status: 'pending'
+                                  })}
+                                  disabled={milestone.status === 'pending'}
+                                >
+                                  Pending
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => updateMilestoneStatusMutation.mutate({
+                                    id: milestone.id, 
+                                    status: 'in_progress'
+                                  })}
+                                  disabled={milestone.status === 'in_progress'}
+                                >
+                                  In Progress
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => updateMilestoneStatusMutation.mutate({
+                                    id: milestone.id, 
+                                    status: 'completed'
+                                  })}
+                                  disabled={milestone.status === 'completed'}
+                                >
+                                  Completed
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => updateMilestoneStatusMutation.mutate({
+                                    id: milestone.id, 
+                                    status: 'paid'
+                                  })}
+                                  disabled={milestone.status === 'paid'}
+                                >
+                                  Paid
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </CardTitle>
                           <CardDescription>{milestone.description}</CardDescription>
                         </div>
