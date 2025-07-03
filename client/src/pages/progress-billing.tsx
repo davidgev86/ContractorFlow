@@ -63,7 +63,7 @@ export default function ProgressBilling() {
 
   // Initialize photos from loaded milestones
   useEffect(() => {
-    if (milestones.length > 0) {
+    if (Array.isArray(milestones) && milestones.length > 0) {
       const photosMap: {[key: number]: any[]} = {};
       milestones.forEach((milestone: any) => {
         if (milestone.photos) {
@@ -601,7 +601,7 @@ export default function ProgressBilling() {
                                 {milestonePhotos[milestone.id].map((photo: any) => (
                                   <div key={photo.id} className="relative group">
                                     <img 
-                                      src={`/api/files/${photo.filename}`}
+                                      src={`/api/files/${photo.fileName}`}
                                       alt="Milestone progress"
                                       className="w-full h-32 object-cover rounded-lg border"
                                     />

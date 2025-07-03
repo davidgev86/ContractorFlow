@@ -1142,6 +1142,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve uploaded files
+  app.get('/api/files/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filepath = path.join(process.cwd(), 'uploads', filename);
+    res.sendFile(filepath);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
