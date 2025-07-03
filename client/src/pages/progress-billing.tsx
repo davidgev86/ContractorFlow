@@ -178,7 +178,12 @@ export default function ProgressBilling() {
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form 
+                onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                  console.log("Form validation failed:", errors);
+                })} 
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="title"
@@ -269,7 +274,16 @@ export default function ProgressBilling() {
                   <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createMilestoneMutation.isPending}>
+                  <Button 
+                    type="submit" 
+                    disabled={createMilestoneMutation.isPending}
+                    onClick={() => {
+                      console.log("Button clicked!");
+                      console.log("Form errors:", form.formState.errors);
+                      console.log("Form values:", form.getValues());
+                      console.log("Form valid:", form.formState.isValid);
+                    }}
+                  >
                     Create Milestone
                   </Button>
                 </div>
