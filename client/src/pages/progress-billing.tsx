@@ -47,6 +47,7 @@ const statusIcons = {
 export default function ProgressBilling() {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [milestonePhotos, setMilestonePhotos] = useState<{[key: number]: any[]}>({});
   const queryClient = useQueryClient();
 
   // Fetch projects for selection
@@ -59,6 +60,19 @@ export default function ProgressBilling() {
     queryKey: ["/api/progress-billing/milestones", selectedProject],
     enabled: !!selectedProject,
   });
+
+  // Initialize photos from loaded milestones
+  useEffect(() => {
+    if (milestones.length > 0) {
+      const photosMap: {[key: number]: any[]} = {};
+      milestones.forEach((milestone: any) => {
+        if (milestone.photos) {
+          photosMap[milestone.id] = milestone.photos;
+        }
+      });
+      setMilestonePhotos(photosMap);
+    }
+  }, [milestones]);
 
   const form = useForm<MilestoneFormData>({
     resolver: zodResolver(milestoneFormSchema),
@@ -118,6 +132,64 @@ export default function ProgressBilling() {
       queryClient.invalidateQueries({ queryKey: ["/api/progress-billing/milestones"] });
     },
   });
+
+  const uploadPhotoMutation = useMutation({
+    mutationFn: async ({ milestoneId, file }: { milestoneId: number; file: File }) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('milestoneId', milestoneId.toString());
+      
+      const response = await fetch('/api/progress-billing/photos', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload photo');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      // Update local state with new photo
+      setMilestonePhotos(prev => ({
+        ...prev,
+        [variables.milestoneId]: [...(prev[variables.milestoneId] || []), data]
+      }));
+    },
+  });
+
+  const deletePhotoMutation = useMutation({
+    mutationFn: async (photoId: number) => {
+      const response = await fetch(`/api/progress-billing/photos/${photoId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete photo');
+      }
+    },
+    onSuccess: (_, photoId) => {
+      // Remove photo from local state
+      setMilestonePhotos(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(milestoneId => {
+          updated[parseInt(milestoneId)] = updated[parseInt(milestoneId)].filter(
+            photo => photo.id !== photoId
+          );
+        });
+        return updated;
+      });
+    },
+  });
+
+  const handlePhotoUpload = async (milestoneId: number, files: FileList | null) => {
+    if (!files) return;
+    
+    Array.from(files).forEach(file => {
+      uploadPhotoMutation.mutate({ milestoneId, file });
+    });
+  };
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -503,9 +575,67 @@ export default function ProgressBilling() {
                         </TabsContent>
                         
                         <TabsContent value="photos">
-                          <div className="text-center py-8 text-muted-foreground">
-                            <Camera className="w-12 h-12 mx-auto mb-4" />
-                            <p>Photo upload functionality coming soon</p>
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <h4 className="font-semibold">Milestone Photos</h4>
+                              <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                onChange={(e) => handlePhotoUpload(milestone.id, e.target.files)}
+                                className="hidden"
+                                id={`photo-upload-${milestone.id}`}
+                              />
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => document.getElementById(`photo-upload-${milestone.id}`)?.click()}
+                              >
+                                <Camera className="w-4 h-4 mr-2" />
+                                Upload Photos
+                              </Button>
+                            </div>
+                            
+                            {milestonePhotos[milestone.id]?.length > 0 ? (
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {milestonePhotos[milestone.id].map((photo: any) => (
+                                  <div key={photo.id} className="relative group">
+                                    <img 
+                                      src={`/api/files/${photo.filename}`}
+                                      alt="Milestone progress"
+                                      className="w-full h-32 object-cover rounded-lg border"
+                                    />
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center">
+                                      <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={() => deletePhotoMutation.mutate(photo.id)}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      {new Date(photo.createdAt).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                                <Camera className="w-12 h-12 mx-auto mb-4" />
+                                <p>No photos uploaded yet</p>
+                                <p className="text-sm">Upload photos to document milestone progress</p>
+                              </div>
+                            )}
+                            
+                            {milestone.requiresPhotos && (
+                              <div className="text-sm text-muted-foreground">
+                                <span className={milestonePhotos[milestone.id]?.length >= milestone.minPhotosRequired ? "text-green-600" : "text-orange-600"}>
+                                  {milestonePhotos[milestone.id]?.length || 0} of {milestone.minPhotosRequired} minimum photos uploaded
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </TabsContent>
                         

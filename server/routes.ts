@@ -4,6 +4,8 @@ import Stripe from "stripe";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import multer from "multer";
+import path from "path";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
@@ -23,6 +25,21 @@ if (process.env.STRIPE_SECRET_KEY) {
     apiVersion: "2023-10-16" as any,
   });
 }
+
+// Configure multer for file uploads
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -898,7 +915,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projectId = req.query.projectId ? parseInt(req.query.projectId) : undefined;
       
       const milestones = await storage.getProgressBillingMilestones(userId, projectId);
-      res.json(milestones);
+      
+      // Fetch photos for each milestone
+      const milestonesWithPhotos = await Promise.all(
+        milestones.map(async (milestone) => {
+          const photos = await storage.getMilestonePhotos(milestone.id);
+          return { ...milestone, photos };
+        })
+      );
+      
+      res.json(milestonesWithPhotos);
     } catch (error) {
       console.error("Get milestones error:", error);
       res.status(500).json({ message: "Failed to get progress billing milestones" });
@@ -1025,8 +1051,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload photos for milestone progress documentation
+  app.post('/api/progress-billing/photos', isAuthenticated, upload.single('file'), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const milestoneId = parseInt(req.body.milestoneId);
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Verify milestone belongs to user
+      const milestone = await storage.getProgressBillingMilestone(milestoneId, userId);
+      if (!milestone) {
+        return res.status(404).json({ message: "Milestone not found" });
+      }
+
+      const photoData = {
+        milestoneId,
+        fileName: req.file.filename,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        capturedAt: new Date().toISOString(),
+        description: null,
+        gpsLocation: null,
+      };
+
+      const photo = await storage.createMilestonePhoto(photoData);
+      res.status(201).json(photo);
+    } catch (error) {
+      console.error("Upload milestone photo error:", error);
+      res.status(500).json({ message: "Failed to upload photo" });
+    }
+  });
+
   // Delete a milestone photo
-  app.delete('/api/progress-billing/milestones/photos/:photoId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/progress-billing/photos/:photoId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const photoId = parseInt(req.params.photoId);
