@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,8 @@ import { apiRequest } from "@/lib/queryClient";
 
 const milestoneFormSchema = insertProgressBillingMilestoneSchema.extend({
   projectId: z.number(),
+}).omit({
+  completedAt: true,
 });
 
 type MilestoneFormData = z.infer<typeof milestoneFormSchema>;
@@ -171,6 +173,9 @@ export default function ProgressBilling() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Create Progress Milestone</DialogTitle>
+              <DialogDescription>
+                Create a new milestone for photo-backed progress billing with QuickBooks integration.
+              </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
