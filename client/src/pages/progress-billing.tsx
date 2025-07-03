@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Camera, DollarSign, Calendar, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Plus, Camera, DollarSign, Calendar, CheckCircle, Clock, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { insertProgressBillingMilestoneSchema } from "@shared/schema";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 
 const milestoneFormSchema = insertProgressBillingMilestoneSchema.extend({
   projectId: z.number(),
@@ -49,6 +50,7 @@ export default function ProgressBilling() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [milestonePhotos, setMilestonePhotos] = useState<{[key: number]: any[]}>({});
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
@@ -230,6 +232,16 @@ export default function ProgressBilling() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Back button */}
+      <Button 
+        variant="ghost" 
+        onClick={() => setLocation('/projects')} 
+        className="mb-4"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Projects
+      </Button>
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Progress Billing</h1>
