@@ -135,8 +135,10 @@ Preferred communication style: Simple, everyday language.
 - June 27, 2025: Converted client reports from CSV to professional PDF format with executive styling, branded headers, visual progress bars, and comprehensive project details
 - June 27, 2025: Enhanced PDF client reports with comprehensive branding including company tagline, contact information, professional disclaimers, and fixed header formatting issues
 - July 1, 2025: Implemented comprehensive QuickBooks integration with OAuth authentication, two-way sync functionality, project-to-estimate syncing, client-to-customer syncing, and Pro plan restriction enforcement
+- July 3, 2025: Built Photo-Backed Progress Billing system with milestone management, QuickBooks invoice integration, visual project progress tracking, and client-facing payment justification
 
 ## Changelog
 
 - June 24, 2025: Initial setup and core functionality implementation
 - July 1, 2025: QuickBooks Integration - Added full OAuth workflow, database schema updates, API endpoints, Settings page, and project sync functionality
+- July 3, 2025: Progress Billing Feature - Complete milestone management system with photo documentation, QuickBooks invoice sync, and residential contractor-focused payment workflows

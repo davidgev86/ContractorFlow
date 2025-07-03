@@ -169,6 +169,48 @@ export const projectPhotos = pgTable("project_photos", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Progress billing milestones with QuickBooks integration
+export const progressBillingMilestones = pgTable("progress_billing_milestones", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  percentage: integer("percentage").notNull(), // 0-100
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, in_progress, completed, invoiced, paid
+  dueDate: timestamp("due_date"),
+  completedAt: timestamp("completed_at"),
+  
+  // QuickBooks integration fields
+  quickbooksInvoiceId: varchar("quickbooks_invoice_id", { length: 255 }),
+  quickbooksInvoiceNumber: varchar("quickbooks_invoice_number", { length: 100 }),
+  quickbooksInvoiceStatus: varchar("quickbooks_invoice_status", { length: 50 }),
+  quickbooksInvoiceAmount: decimal("quickbooks_invoice_amount", { precision: 10, scale: 2 }),
+  
+  // Photo documentation requirements
+  requiresPhotos: boolean("requires_photos").notNull().default(true),
+  minPhotosRequired: integer("min_photos_required").notNull().default(3),
+  photoInstructions: text("photo_instructions"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Photos specifically linked to billing milestones
+export const milestonePhotos = pgTable("milestone_photos", {
+  id: serial("id").primaryKey(),
+  milestoneId: integer("milestone_id").references(() => progressBillingMilestones.id, { onDelete: "cascade" }).notNull(),
+  fileName: varchar("file_name", { length: 255 }).notNull(),
+  originalName: varchar("original_name", { length: 255 }).notNull(),
+  fileSize: integer("file_size").notNull(),
+  mimeType: varchar("mime_type", { length: 100 }).notNull(),
+  description: text("description"),
+  capturedAt: timestamp("captured_at").notNull(),
+  gpsLocation: varchar("gps_location", { length: 255 }), // For job site verification
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const userRelations = relations(users, ({ many }) => ({
   projects: many(projects),
@@ -182,6 +224,7 @@ export const projectRelations = relations(projects, ({ one, many }) => ({
   client: one(clients, { fields: [projects.clientId], references: [clients.id] }),
   tasks: many(tasks),
   budgetItems: many(budgetItems),
+  progressBillingMilestones: many(progressBillingMilestones),
 }));
 
 export const clientRelations = relations(clients, ({ one, many }) => ({
@@ -197,6 +240,16 @@ export const taskRelations = relations(tasks, ({ one }) => ({
 export const budgetItemRelations = relations(budgetItems, ({ one }) => ({
   user: one(users, { fields: [budgetItems.userId], references: [users.id] }),
   project: one(projects, { fields: [budgetItems.projectId], references: [projects.id] }),
+}));
+
+export const progressBillingMilestoneRelations = relations(progressBillingMilestones, ({ one, many }) => ({
+  project: one(projects, { fields: [progressBillingMilestones.projectId], references: [projects.id] }),
+  user: one(users, { fields: [progressBillingMilestones.userId], references: [users.id] }),
+  photos: many(milestonePhotos),
+}));
+
+export const milestonePhotoRelations = relations(milestonePhotos, ({ one }) => ({
+  milestone: one(progressBillingMilestones, { fields: [milestonePhotos.milestoneId], references: [progressBillingMilestones.id] }),
 }));
 
 // Insert schemas
@@ -262,6 +315,22 @@ export const insertUpdateRequestSchema = createInsertSchema(updateRequests).omit
   updatedAt: true,
 });
 
+export const insertProgressBillingMilestoneSchema = createInsertSchema(progressBillingMilestones).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  dueDate: z.string().optional(),
+  amount: z.string(),
+});
+
+export const insertMilestonePhotoSchema = createInsertSchema(milestonePhotos).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  capturedAt: z.string(),
+});
+
 export type ClientPortalUser = typeof clientPortalUsers.$inferSelect;
 export type InsertClientPortalUser = z.infer<typeof insertClientPortalUserSchema>;
 export type ProjectUpdate = typeof projectUpdates.$inferSelect;
@@ -270,3 +339,7 @@ export type ProjectPhoto = typeof projectPhotos.$inferSelect;
 export type InsertProjectPhoto = z.infer<typeof insertProjectPhotoSchema>;
 export type UpdateRequest = typeof updateRequests.$inferSelect;
 export type InsertUpdateRequest = z.infer<typeof insertUpdateRequestSchema>;
+export type ProgressBillingMilestone = typeof progressBillingMilestones.$inferSelect;
+export type InsertProgressBillingMilestone = z.infer<typeof insertProgressBillingMilestoneSchema>;
+export type MilestonePhoto = typeof milestonePhotos.$inferSelect;
+export type InsertMilestonePhoto = z.infer<typeof insertMilestonePhotoSchema>;

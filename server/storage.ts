@@ -8,6 +8,8 @@ import {
   projectUpdates,
   projectPhotos,
   updateRequests,
+  progressBillingMilestones,
+  milestonePhotos,
   type User,
   type UpsertUser,
   type Project,
@@ -26,6 +28,10 @@ import {
   type InsertProjectPhoto,
   type UpdateRequest,
   type InsertUpdateRequest,
+  type ProgressBillingMilestone,
+  type InsertProgressBillingMilestone,
+  type MilestonePhoto,
+  type InsertMilestonePhoto,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -110,6 +116,26 @@ export interface IStorage {
   getUpdateRequestsForClient(clientId: number): Promise<UpdateRequest[]>;
   updateRequestStatus(id: number, status: string): Promise<void>;
   updateRequestReply(id: number, reply: string): Promise<void>;
+  
+  // Progress billing milestone operations
+  getProgressBillingMilestones(userId: string, projectId?: number): Promise<ProgressBillingMilestone[]>;
+  getProgressBillingMilestone(id: number, userId: string): Promise<ProgressBillingMilestone | undefined>;
+  createProgressBillingMilestone(milestone: InsertProgressBillingMilestone): Promise<ProgressBillingMilestone>;
+  updateProgressBillingMilestone(id: number, userId: string, data: Partial<InsertProgressBillingMilestone>): Promise<ProgressBillingMilestone>;
+  deleteProgressBillingMilestone(id: number, userId: string): Promise<void>;
+  
+  // Milestone photo operations
+  getMilestonePhotos(milestoneId: number): Promise<MilestonePhoto[]>;
+  createMilestonePhoto(photo: InsertMilestonePhoto): Promise<MilestonePhoto>;
+  deleteMilestonePhoto(id: number, userId: string): Promise<void>;
+  
+  // QuickBooks invoice integration
+  updateMilestoneQuickBooksInvoice(id: number, userId: string, data: {
+    quickbooksInvoiceId?: string;
+    quickbooksInvoiceNumber?: string;
+    quickbooksInvoiceStatus?: string;
+    quickbooksInvoiceAmount?: string;
+  }): Promise<ProgressBillingMilestone>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -575,6 +601,133 @@ export class DatabaseStorage implements IStorage {
       .update(updateRequests)
       .set({ contractorReply: reply, updatedAt: new Date() })
       .where(eq(updateRequests.id, id));
+  }
+
+  // Progress billing milestone operations
+  async getProgressBillingMilestones(userId: string, projectId?: number): Promise<ProgressBillingMilestone[]> {
+    let whereCondition = eq(progressBillingMilestones.userId, userId);
+
+    if (projectId) {
+      whereCondition = and(
+        eq(progressBillingMilestones.userId, userId),
+        eq(progressBillingMilestones.projectId, projectId)
+      );
+    }
+
+    return await db
+      .select()
+      .from(progressBillingMilestones)
+      .where(whereCondition)
+      .orderBy(progressBillingMilestones.percentage);
+  }
+
+  async getProgressBillingMilestone(id: number, userId: string): Promise<ProgressBillingMilestone | undefined> {
+    const [milestone] = await db
+      .select()
+      .from(progressBillingMilestones)
+      .where(and(
+        eq(progressBillingMilestones.id, id),
+        eq(progressBillingMilestones.userId, userId)
+      ));
+    return milestone;
+  }
+
+  async createProgressBillingMilestone(milestoneData: InsertProgressBillingMilestone): Promise<ProgressBillingMilestone> {
+    const [milestone] = await db
+      .insert(progressBillingMilestones)
+      .values({
+        ...milestoneData,
+        dueDate: milestoneData.dueDate ? new Date(milestoneData.dueDate) : null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return milestone;
+  }
+
+  async updateProgressBillingMilestone(id: number, userId: string, data: Partial<InsertProgressBillingMilestone>): Promise<ProgressBillingMilestone> {
+    const updateData = {
+      ...data,
+      dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+      updatedAt: new Date(),
+    };
+
+    const [milestone] = await db
+      .update(progressBillingMilestones)
+      .set(updateData)
+      .where(and(
+        eq(progressBillingMilestones.id, id),
+        eq(progressBillingMilestones.userId, userId)
+      ))
+      .returning();
+    return milestone;
+  }
+
+  async deleteProgressBillingMilestone(id: number, userId: string): Promise<void> {
+    await db
+      .delete(progressBillingMilestones)
+      .where(and(
+        eq(progressBillingMilestones.id, id),
+        eq(progressBillingMilestones.userId, userId)
+      ));
+  }
+
+  // Milestone photo operations
+  async getMilestonePhotos(milestoneId: number): Promise<MilestonePhoto[]> {
+    return await db
+      .select()
+      .from(milestonePhotos)
+      .where(eq(milestonePhotos.milestoneId, milestoneId))
+      .orderBy(desc(milestonePhotos.capturedAt));
+  }
+
+  async createMilestonePhoto(photoData: InsertMilestonePhoto): Promise<MilestonePhoto> {
+    const [photo] = await db
+      .insert(milestonePhotos)
+      .values({
+        ...photoData,
+        capturedAt: new Date(photoData.capturedAt),
+        createdAt: new Date(),
+      })
+      .returning();
+    return photo;
+  }
+
+  async deleteMilestonePhoto(id: number, userId: string): Promise<void> {
+    // First verify the photo belongs to a milestone owned by the user
+    const [photo] = await db
+      .select({ milestoneId: milestonePhotos.milestoneId })
+      .from(milestonePhotos)
+      .innerJoin(progressBillingMilestones, eq(milestonePhotos.milestoneId, progressBillingMilestones.id))
+      .where(and(
+        eq(milestonePhotos.id, id),
+        eq(progressBillingMilestones.userId, userId)
+      ));
+
+    if (photo) {
+      await db.delete(milestonePhotos).where(eq(milestonePhotos.id, id));
+    }
+  }
+
+  // QuickBooks invoice integration
+  async updateMilestoneQuickBooksInvoice(id: number, userId: string, data: {
+    quickbooksInvoiceId?: string;
+    quickbooksInvoiceNumber?: string;
+    quickbooksInvoiceStatus?: string;
+    quickbooksInvoiceAmount?: string;
+  }): Promise<ProgressBillingMilestone> {
+    const [milestone] = await db
+      .update(progressBillingMilestones)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(and(
+        eq(progressBillingMilestones.id, id),
+        eq(progressBillingMilestones.userId, userId)
+      ))
+      .returning();
+    return milestone;
   }
 }
 

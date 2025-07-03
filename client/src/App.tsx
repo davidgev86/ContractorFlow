@@ -21,6 +21,7 @@ import ClientPortalForgotPassword from "@/pages/client-portal-forgot-password";
 import ClientPortalResetPassword from "@/pages/client-portal-reset-password";
 import Settings from "@/pages/settings";
 import QuickBooksCallback from "@/pages/quickbooks-callback";
+import ProgressBilling from "@/pages/progress-billing";
 
 import NotFound from "@/pages/not-found";
 
@@ -45,6 +46,7 @@ function Router() {
           <Route path="/clients" component={Clients} />
           <Route path="/reports" component={Reports} />
           <Route path="/project-updates" component={ProjectUpdates} />
+          <Route path="/progress-billing" component={ProgressBilling} />
           <Route path="/client-portal-setup" component={ClientPortalSetup} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/settings" component={Settings} />

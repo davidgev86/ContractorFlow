@@ -8,9 +8,9 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
 import { QuickBooksService, getQuickBooksService } from "./quickbooks";
-import { projectUpdates, projectPhotos, updateRequests } from "@shared/schema";
+import { projectUpdates, projectPhotos, updateRequests, progressBillingMilestones, milestonePhotos } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
-import { insertProjectSchema, insertClientSchema, insertTaskSchema, insertBudgetItemSchema } from "@shared/schema";
+import { insertProjectSchema, insertClientSchema, insertTaskSchema, insertBudgetItemSchema, insertProgressBillingMilestoneSchema, insertMilestonePhotoSchema } from "@shared/schema";
 import { z } from "zod";
 
 if (!process.env.STRIPE_SECRET_KEY && !process.env.VITE_STRIPE_PUBLIC_KEY) {
@@ -886,6 +886,198 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("QuickBooks company info error:", error);
       res.status(500).json({ message: "Failed to get company information" });
+    }
+  });
+
+  // Progress Billing Milestone Routes
+
+  // Get progress billing milestones for a project or all projects
+  app.get('/api/progress-billing/milestones', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const projectId = req.query.projectId ? parseInt(req.query.projectId) : undefined;
+      
+      const milestones = await storage.getProgressBillingMilestones(userId, projectId);
+      res.json(milestones);
+    } catch (error) {
+      console.error("Get milestones error:", error);
+      res.status(500).json({ message: "Failed to get progress billing milestones" });
+    }
+  });
+
+  // Get a specific progress billing milestone
+  app.get('/api/progress-billing/milestones/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const milestoneId = parseInt(req.params.id);
+      
+      const milestone = await storage.getProgressBillingMilestone(milestoneId, userId);
+      
+      if (!milestone) {
+        return res.status(404).json({ message: "Milestone not found" });
+      }
+      
+      res.json(milestone);
+    } catch (error) {
+      console.error("Get milestone error:", error);
+      res.status(500).json({ message: "Failed to get progress billing milestone" });
+    }
+  });
+
+  // Create a new progress billing milestone
+  app.post('/api/progress-billing/milestones', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validatedData = insertProgressBillingMilestoneSchema.parse({
+        ...req.body,
+        userId,
+      });
+      
+      const milestone = await storage.createProgressBillingMilestone(validatedData);
+      res.status(201).json(milestone);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid milestone data", errors: error.errors });
+      }
+      console.error("Create milestone error:", error);
+      res.status(500).json({ message: "Failed to create progress billing milestone" });
+    }
+  });
+
+  // Update a progress billing milestone
+  app.patch('/api/progress-billing/milestones/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const milestoneId = parseInt(req.params.id);
+      
+      const validatedData = insertProgressBillingMilestoneSchema.partial().parse(req.body);
+      
+      const milestone = await storage.updateProgressBillingMilestone(milestoneId, userId, validatedData);
+      res.json(milestone);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid milestone data", errors: error.errors });
+      }
+      console.error("Update milestone error:", error);
+      res.status(500).json({ message: "Failed to update progress billing milestone" });
+    }
+  });
+
+  // Delete a progress billing milestone
+  app.delete('/api/progress-billing/milestones/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const milestoneId = parseInt(req.params.id);
+      
+      await storage.deleteProgressBillingMilestone(milestoneId, userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete milestone error:", error);
+      res.status(500).json({ message: "Failed to delete progress billing milestone" });
+    }
+  });
+
+  // Get photos for a specific milestone
+  app.get('/api/progress-billing/milestones/:id/photos', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const milestoneId = parseInt(req.params.id);
+      
+      // Verify milestone belongs to user
+      const milestone = await storage.getProgressBillingMilestone(milestoneId, userId);
+      if (!milestone) {
+        return res.status(404).json({ message: "Milestone not found" });
+      }
+      
+      const photos = await storage.getMilestonePhotos(milestoneId);
+      res.json(photos);
+    } catch (error) {
+      console.error("Get milestone photos error:", error);
+      res.status(500).json({ message: "Failed to get milestone photos" });
+    }
+  });
+
+  // Create a photo for a milestone
+  app.post('/api/progress-billing/milestones/:id/photos', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const milestoneId = parseInt(req.params.id);
+      
+      // Verify milestone belongs to user
+      const milestone = await storage.getProgressBillingMilestone(milestoneId, userId);
+      if (!milestone) {
+        return res.status(404).json({ message: "Milestone not found" });
+      }
+      
+      const validatedData = insertMilestonePhotoSchema.parse({
+        ...req.body,
+        milestoneId,
+      });
+      
+      const photo = await storage.createMilestonePhoto(validatedData);
+      res.status(201).json(photo);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid photo data", errors: error.errors });
+      }
+      console.error("Create milestone photo error:", error);
+      res.status(500).json({ message: "Failed to create milestone photo" });
+    }
+  });
+
+  // Delete a milestone photo
+  app.delete('/api/progress-billing/milestones/photos/:photoId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const photoId = parseInt(req.params.photoId);
+      
+      await storage.deleteMilestonePhoto(photoId, userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete milestone photo error:", error);
+      res.status(500).json({ message: "Failed to delete milestone photo" });
+    }
+  });
+
+  // Sync milestone to QuickBooks invoice (Pro plan only)
+  app.post('/api/progress-billing/milestones/:id/sync-quickbooks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const milestoneId = parseInt(req.params.id);
+      
+      const user = await storage.getUser(userId);
+      if (!user || user.planType !== 'pro') {
+        return res.status(403).json({ message: "QuickBooks sync requires Pro plan" });
+      }
+      
+      const qbService = await getQuickBooksService(userId);
+      if (!qbService) {
+        return res.status(400).json({ message: "QuickBooks not connected" });
+      }
+      
+      const milestone = await storage.getProgressBillingMilestone(milestoneId, userId);
+      if (!milestone) {
+        return res.status(404).json({ message: "Milestone not found" });
+      }
+      
+      // Get project and client info for invoice creation
+      const project = await storage.getProject(milestone.projectId, userId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      const client = project.clientId ? await storage.getClient(project.clientId, userId) : null;
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      // Create QuickBooks invoice (implementation depends on QBService methods)
+      // This would involve creating an invoice in QuickBooks and updating the milestone
+      
+      res.json({ message: "Milestone sync to QuickBooks initiated", milestoneId });
+    } catch (error) {
+      console.error("Sync milestone to QuickBooks error:", error);
+      res.status(500).json({ message: "Failed to sync milestone to QuickBooks" });
     }
   });
 

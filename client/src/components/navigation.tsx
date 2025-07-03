@@ -26,7 +26,8 @@ import {
   FileText,
   ExternalLink,
   MessageSquare,
-  Settings
+  Settings,
+  DollarSign
 } from "lucide-react";
 
 export function Navigation() {
@@ -40,6 +41,7 @@ export function Navigation() {
     { path: "/clients", label: "Clients", icon: Users },
     { path: "/reports", label: "Reports", icon: BarChart3 },
     { path: "/project-updates", label: "Updates", icon: FileText },
+    { path: "/progress-billing", label: "Progress Billing", icon: DollarSign },
     { path: "/client-portal-setup", label: "Portal", icon: ExternalLink },
     { path: "/settings", label: "Settings", icon: Settings },
   ];
