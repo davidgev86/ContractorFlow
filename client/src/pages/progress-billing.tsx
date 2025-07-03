@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -67,7 +67,7 @@ export default function ProgressBilling() {
       requiresPhotos: true,
       minPhotosRequired: 3,
       photoInstructions: "",
-      projectId: selectedProject || 0,
+      projectId: 0,
     },
   });
 
@@ -115,10 +115,36 @@ export default function ProgressBilling() {
     },
   });
 
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (isCreateOpen && selectedProject) {
+      form.reset({
+        title: "",
+        description: "",
+        percentage: 0,
+        amount: "",
+        status: "pending",
+        requiresPhotos: true,
+        minPhotosRequired: 3,
+        photoInstructions: "",
+        projectId: selectedProject,
+      });
+    }
+  }, [isCreateOpen, selectedProject, form]);
+
   const onSubmit = (data: MilestoneFormData) => {
+    console.log("Form submitted with data:", data);
+    console.log("Selected project:", selectedProject);
+    console.log("Form validation errors:", form.formState.errors);
+    
+    if (!selectedProject) {
+      console.error("No project selected");
+      return;
+    }
+    
     createMilestoneMutation.mutate({
       ...data,
-      projectId: selectedProject!,
+      projectId: selectedProject,
     });
   };
 
