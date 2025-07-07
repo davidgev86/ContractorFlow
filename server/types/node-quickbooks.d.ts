@@ -1,3 +1,15 @@
+/**
+ * TypeScript Definitions for node-quickbooks
+ * 
+ * This file provides type definitions for the node-quickbooks library
+ * which doesn't include native TypeScript support.
+ * 
+ * Defines interfaces for:
+ * - QuickBooks constructor and instance
+ * - Core API methods for customers, estimates, invoices
+ * - Callback function signatures
+ */
+
 declare module 'node-quickbooks' {
   interface QuickBooksConstructor {
     new (

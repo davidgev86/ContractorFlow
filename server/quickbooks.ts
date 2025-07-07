@@ -1,3 +1,17 @@
+/**
+ * QuickBooks Integration Service
+ * 
+ * This file handles the integration with QuickBooks Online API for accounting features.
+ * It provides OAuth authentication, data synchronization, and invoice management.
+ * 
+ * Features:
+ * - QuickBooks OAuth 2.0 authentication
+ * - Customer and project synchronization
+ * - Invoice creation and management
+ * - Two-way data sync between ContractorFlow and QuickBooks
+ * - Support for both sandbox and production environments
+ */
+
 // @ts-ignore
 import QuickBooks from 'node-quickbooks';
 import { Request, Response } from 'express';

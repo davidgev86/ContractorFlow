@@ -1,3 +1,17 @@
+/**
+ * Navigation Component
+ * 
+ * This component provides the main navigation interface for the application.
+ * It includes both desktop and mobile navigation with responsive design.
+ * 
+ * Features:
+ * - Responsive navigation with mobile menu
+ * - Active route highlighting
+ * - User profile display
+ * - Trial status indicator
+ * - Authentication-aware navigation items
+ */
+
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";

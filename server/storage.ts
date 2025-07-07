@@ -1,3 +1,19 @@
+/**
+ * Data Storage Layer
+ * 
+ * This file provides the main data access layer for ContractorFlow.
+ * It defines the storage interface and implements database operations using Drizzle ORM.
+ * 
+ * Key Components:
+ * - IStorage interface: Defines all required database operations
+ * - DatabaseStorage class: Implements the interface with PostgreSQL operations
+ * - Comprehensive CRUD operations for all entities
+ * - Complex queries for dashboard stats and reporting
+ * - Transaction support for critical operations
+ * 
+ * All database operations are type-safe and follow consistent patterns.
+ */
+
 import {
   users,
   projects,

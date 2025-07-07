@@ -1,3 +1,16 @@
+/**
+ * Client Portal Authentication Hook
+ * 
+ * This hook manages authentication state for the client portal using JWT tokens.
+ * It provides separate authentication from the main contractor authentication.
+ * 
+ * Features:
+ * - JWT token management in localStorage
+ * - Client profile fetching
+ * - Authentication status tracking
+ * - Automatic token inclusion in requests
+ */
+
 import { useQuery } from "@tanstack/react-query";
 
 const CLIENT_PORTAL_API_BASE = "/api/client-portal";

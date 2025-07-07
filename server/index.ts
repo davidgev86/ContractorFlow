@@ -1,3 +1,16 @@
+/**
+ * Express Server Entry Point
+ * 
+ * This is the main server file that initializes the Express application,
+ * sets up middleware, registers routes, and starts the server.
+ * 
+ * Features:
+ * - Request/response logging for API endpoints
+ * - Error handling middleware
+ * - Development/production environment setup
+ * - Static file serving and Vite integration
+ */
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";

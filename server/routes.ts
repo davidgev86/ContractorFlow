@@ -1,3 +1,18 @@
+/**
+ * API Routes Configuration
+ * 
+ * This file contains all API route definitions for the ContractorFlow application.
+ * It handles authentication, CRUD operations, file uploads, and external integrations.
+ * 
+ * Route Categories:
+ * - Authentication (Replit OAuth, Client Portal)
+ * - Project Management (Projects, Tasks, Budgets)
+ * - Client Management (Clients, Portal, Communications)
+ * - File Management (Photo uploads, serving)
+ * - Billing & Payments (Stripe, QuickBooks, Progress Billing)
+ * - Reporting & Analytics (Dashboard stats, PDF reports)
+ */
+
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";

@@ -1,3 +1,17 @@
+/**
+ * Database Schema Definition
+ * 
+ * This file contains the complete database schema for ContractorFlow,
+ * including all tables, relations, and TypeScript types.
+ * 
+ * Key Features:
+ * - PostgreSQL tables with Drizzle ORM
+ * - Type-safe database operations
+ * - Zod validation schemas
+ * - Comprehensive relations between entities
+ * - Support for user auth, projects, clients, tasks, billing, and file management
+ */
+
 import {
   pgTable,
   text,

@@ -1,3 +1,16 @@
+/**
+ * Database Connection Configuration
+ * 
+ * This file establishes the connection to the PostgreSQL database using Neon serverless.
+ * It configures the connection pool and initializes the Drizzle ORM instance.
+ * 
+ * Features:
+ * - Neon serverless PostgreSQL connection
+ * - WebSocket support for real-time connections
+ * - Drizzle ORM with complete schema integration
+ * - Connection pooling for optimal performance
+ */
+
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";

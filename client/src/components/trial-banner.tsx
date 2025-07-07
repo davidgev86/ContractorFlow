@@ -1,3 +1,17 @@
+/**
+ * Trial Banner Component
+ * 
+ * This component displays a banner notification for users on trial plans.
+ * Shows remaining trial days and provides upgrade prompts.
+ * 
+ * Features:
+ * - Conditional rendering based on trial status
+ * - Days remaining countdown
+ * - Call-to-action for subscription upgrade
+ * - Responsive design for mobile and desktop
+ * - Auto-hide for subscribed users
+ */
+
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";

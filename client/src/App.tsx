@@ -1,3 +1,17 @@
+/**
+ * Main App Component
+ * 
+ * This is the root component for the ContractorFlow frontend application.
+ * It handles routing, authentication state, and provides global context providers.
+ * 
+ * Key Features:
+ * - Client-side routing with Wouter
+ * - Authentication-based route protection
+ * - React Query for server state management
+ * - Global UI providers (Toaster, Tooltip)
+ * - Loading states and error boundaries
+ */
+
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";

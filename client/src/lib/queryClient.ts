@@ -1,3 +1,16 @@
+/**
+ * React Query Client Configuration
+ * 
+ * This file configures the React Query client for server state management.
+ * It provides a centralized API request handler and query configuration.
+ * 
+ * Features:
+ * - Centralized API request handling with error management
+ * - Authentication-aware query functions
+ * - Consistent retry and caching strategies
+ * - Support for both queries and mutations
+ */
+
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {

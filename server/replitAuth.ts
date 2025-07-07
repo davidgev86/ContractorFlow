@@ -1,3 +1,17 @@
+/**
+ * Replit Authentication Integration
+ * 
+ * This file handles authentication using Replit's OpenID Connect (OIDC) provider.
+ * It configures Passport.js with the OpenID Connect strategy and manages user sessions.
+ * 
+ * Features:
+ * - OpenID Connect authentication with Replit
+ * - Session management with PostgreSQL storage
+ * - Passport.js strategy configuration
+ * - User profile management and storage
+ * - Session persistence and security
+ */
+
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 

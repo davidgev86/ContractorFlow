@@ -1,3 +1,17 @@
+/**
+ * Project Card Component
+ * 
+ * This component displays project information in a card format.
+ * Used in project listings and dashboard views.
+ * 
+ * Features:
+ * - Status badges with color coding
+ * - Progress bar visualization
+ * - Budget and due date display
+ * - Responsive design
+ * - Action buttons for project management
+ */
+
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";

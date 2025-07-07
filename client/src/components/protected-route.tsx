@@ -1,3 +1,18 @@
+/**
+ * Protected Route Component
+ * 
+ * This component provides route protection based on authentication and subscription status.
+ * Handles redirects for unauthorized users and subscription requirements.
+ * 
+ * Features:
+ * - Authentication state checking
+ * - Subscription status validation
+ * - Automatic redirects to login/pricing
+ * - Loading states with spinner
+ * - Toast notifications for user feedback
+ * - Trial expiration handling
+ */
+
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";

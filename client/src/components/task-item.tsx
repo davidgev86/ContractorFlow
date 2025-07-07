@@ -1,3 +1,17 @@
+/**
+ * Task Item Component
+ * 
+ * This component displays individual task information with interactive controls.
+ * Supports task completion tracking and status updates.
+ * 
+ * Features:
+ * - Checkbox for task completion
+ * - Priority and status badges
+ * - Real-time status updates
+ * - Error handling with toast notifications
+ * - Optimistic UI updates
+ */
+
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
