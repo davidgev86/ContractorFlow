@@ -43,7 +43,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (!isLoading && isAuthenticated && user && !user.canAccessApp) {
       toast({
         title: "Subscription Required",
-        description: "Your trial has expired. Please upgrade to continue using ContractorFlow.",
+        description: "Your trial has expired. Please upgrade to continue using FieldContractorFlow.",
         variant: "destructive",
       });
       setTimeout(() => {

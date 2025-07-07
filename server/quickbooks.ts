@@ -8,7 +8,7 @@
  * - QuickBooks OAuth 2.0 authentication
  * - Customer and project synchronization
  * - Invoice creation and management
- * - Two-way data sync between ContractorFlow and QuickBooks
+ * - Two-way data sync between FieldContractorFlow and QuickBooks
  * - Support for both sandbox and production environments
  */
 

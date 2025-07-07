@@ -152,7 +152,7 @@ export default function Reports() {
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(24);
     pdf.setFont("helvetica", "bold");
-    pdf.text("ContractorFlow", 20, 22);
+    pdf.text("FieldContractorFlow", 20, 22);
     
     // Tagline
     pdf.setFontSize(10);
@@ -196,7 +196,7 @@ export default function Reports() {
     pdf.setFontSize(9);
     pdf.setTextColor(59, 130, 246);
     pdf.setFont("helvetica", "bold");
-    pdf.text("About ContractorFlow:", 25, 100);
+    pdf.text("About FieldContractorFlow:", 25, 100);
     
     pdf.setFontSize(8);
     pdf.setTextColor(80, 80, 80);
@@ -400,7 +400,7 @@ export default function Reports() {
     pdf.setFontSize(8);
     pdf.setTextColor(59, 130, 246); // Brand blue
     pdf.setFont("helvetica", "bold");
-    pdf.text("ContractorFlow - Professional Project Management Solutions", 20, footerY + 3);
+    pdf.text("FieldContractorFlow - Professional Project Management Solutions", 20, footerY + 3);
     
     pdf.setFontSize(7);
     pdf.setTextColor(100, 100, 100);

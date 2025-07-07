@@ -46,7 +46,7 @@ const CheckoutForm = () => {
     } else {
       toast({
         title: "Payment Successful",
-        description: "Welcome to ContractorFlow! Your subscription is now active.",
+        description: "Welcome to FieldContractorFlow! Your subscription is now active.",
       });
     }
 

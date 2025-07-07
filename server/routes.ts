@@ -1,7 +1,7 @@
 /**
  * API Routes Configuration
  * 
- * This file contains all API route definitions for the ContractorFlow application.
+ * This file contains all API route definitions for the FieldContractorFlow application.
  * It handles authentication, CRUD operations, file uploads, and external integrations.
  * 
  * Route Categories:
@@ -302,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: `ContractorFlow ${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan`,
+                name: `FieldContractorFlow ${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan`,
               },
               unit_amount: planType === 'core' ? 2500 : 3500, // $25 or $35
               recurring: {

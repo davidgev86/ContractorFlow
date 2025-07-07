@@ -1,7 +1,7 @@
 /**
  * Database Schema Definition
  * 
- * This file contains the complete database schema for ContractorFlow,
+ * This file contains the complete database schema for FieldContractorFlow,
  * including all tables, relations, and TypeScript types.
  * 
  * Key Features:

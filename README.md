@@ -1,10 +1,10 @@
-# ContractorFlow
+# FieldContractorFlow
 
-A comprehensive project management application built specifically for contractors. ContractorFlow streamlines project workflows, task scheduling, client communication, and business operations through an advanced project management portal.
+A comprehensive project management application built specifically for contractors. FieldContractorFlow streamlines project workflows, task scheduling, client communication, and business operations through an advanced project management portal.
 
 ## 🎯 Overview
 
-ContractorFlow helps contractors manage their business more efficiently by providing:
+FieldContractorFlow helps contractors manage their business more efficiently by providing:
 
 - **Project Management**: Complete project lifecycle tracking with tasks, budgets, and timelines
 - **Client Portal**: Dedicated client access for project updates and communication
@@ -221,3 +221,5 @@ This project is proprietary software developed for contractor management needs.
 ---
 
 Built with ❤️ for contractors who want to focus on their craft, not paperwork.
+
+Visit us at [fieldcontractorflow.com](https://fieldcontractorflow.com)

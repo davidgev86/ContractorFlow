@@ -1,7 +1,7 @@
 /**
  * Data Storage Layer
  * 
- * This file provides the main data access layer for ContractorFlow.
+ * This file provides the main data access layer for FieldContractorFlow.
  * It defines the storage interface and implements database operations using Drizzle ORM.
  * 
  * Key Components:

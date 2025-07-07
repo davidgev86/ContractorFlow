@@ -13,7 +13,7 @@ export default function Landing() {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <HardHat className="text-primary text-2xl mr-2" />
-                <span className="font-bold text-xl text-slate-800">ContractorFlow</span>
+                <span className="font-bold text-xl text-slate-800">FieldContractorFlow</span>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -37,7 +37,7 @@ export default function Landing() {
               <span className="block text-blue-200">Contractors</span>
             </h1>
             <p className="mt-6 text-xl text-blue-100 max-w-3xl mx-auto">
-              Stop juggling spreadsheets and sticky notes. ContractorFlow gives you job scheduling, 
+              Stop juggling spreadsheets and sticky notes. FieldContractorFlow gives you job scheduling, 
               budget tracking, and client portals - all in one mobile-friendly platform.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -72,7 +72,7 @@ export default function Landing() {
               Everything You Need to Run Your Business
             </h2>
             <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
-              From job scheduling to client communication, ContractorFlow streamlines 
+              From job scheduling to client communication, FieldContractorFlow streamlines 
               every aspect of your contracting business.
             </p>
           </div>
@@ -259,7 +259,7 @@ export default function Landing() {
             Ready to Streamline Your Business?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join contractors who've already improved their project management with ContractorFlow.
+            Join contractors who've already improved their project management with FieldContractorFlow.
           </p>
           <Button 
             size="lg"
@@ -277,10 +277,10 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center">
             <HardHat className="text-primary text-2xl mr-2" />
-            <span className="font-bold text-xl">ContractorFlow</span>
+            <span className="font-bold text-xl">FieldContractorFlow</span>
           </div>
           <p className="text-center text-slate-400 mt-4">
-            © 2024 ContractorFlow. All rights reserved.
+            © 2024 FieldContractorFlow. All rights reserved.
           </p>
         </div>
       </footer>

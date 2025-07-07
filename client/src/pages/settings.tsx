@@ -237,7 +237,7 @@ export default function Settings() {
                             <div>
                               <h4 className="font-medium text-green-900">Connected Successfully</h4>
                               <p className="text-sm text-green-700 mt-1">
-                                Your ContractorFlow projects and clients can now be synced with QuickBooks. 
+                                Your FieldContractorFlow projects and clients can now be synced with QuickBooks. 
                                 Use the sync buttons in your project and client pages to send data to QuickBooks.
                               </p>
                               <div className="mt-3 space-y-1 text-sm text-green-700">

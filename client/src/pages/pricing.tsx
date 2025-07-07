@@ -69,7 +69,7 @@ export default function Pricing() {
           <div className="text-center mb-12">
             <h1 className="text-3xl font-bold text-slate-800 mb-4">Choose Your Plan</h1>
             <p className="text-lg text-slate-600 mb-8">
-              Upgrade your account to continue using ContractorFlow
+              Upgrade your account to continue using FieldContractorFlow
             </p>
             
             {/* Billing Toggle */}

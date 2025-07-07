@@ -1,7 +1,7 @@
 /**
  * Main App Component
  * 
- * This is the root component for the ContractorFlow frontend application.
+ * This is the root component for the FieldContractorFlow frontend application.
  * It handles routing, authentication state, and provides global context providers.
  * 
  * Key Features:

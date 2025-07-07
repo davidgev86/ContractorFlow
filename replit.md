@@ -2,7 +2,7 @@
 
 ## Overview
 
-ContractorFlow is a comprehensive project management application built specifically for contractors. It features a full-stack architecture with a React frontend, Express.js backend, and PostgreSQL database. The application includes subscription management, client portals, project updates, and file management capabilities.
+FieldContractorFlow is a comprehensive project management application built specifically for contractors. It features a full-stack architecture with a React frontend, Express.js backend, and PostgreSQL database. The application includes subscription management, client portals, project updates, and file management capabilities.
 
 ## System Architecture
 
@@ -120,7 +120,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- June 24, 2025: Initial ContractorFlow setup with full-stack architecture
+- June 24, 2025: Initial FieldContractorFlow setup with full-stack architecture
 - June 24, 2025: Implemented comprehensive client portal with authentication, project viewing, and update requests
 - June 24, 2025: Added contractor reply system for client requests with database integration
 - June 24, 2025: Integrated client requests into projects page using tabbed interface with status management
@@ -139,6 +139,7 @@ Preferred communication style: Simple, everyday language.
 - July 3, 2025: Completed interactive milestone status management with clickable status badges, dropdown menus for status changes (pending/in_progress/completed/paid), and real-time progress overview updates
 - July 3, 2025: Implemented comprehensive photo upload system with multer file handling, image validation, drag & drop interface, photo deletion capability, and secure file serving for milestone documentation
 - July 7, 2025: Completed comprehensive codebase cleanup and validation with proper documentation, file organization, and structure optimization
+- July 7, 2025: Completed full application rebranding from "ContractorFlow" to "FieldContractorFlow" throughout entire codebase to align with new domain fieldcontractorflow.com
 
 ## Changelog
 
@@ -146,3 +147,4 @@ Preferred communication style: Simple, everyday language.
 - July 1, 2025: QuickBooks Integration - Added full OAuth workflow, database schema updates, API endpoints, Settings page, and project sync functionality
 - July 3, 2025: Progress Billing Feature - Complete milestone management system with photo documentation, QuickBooks invoice sync, and residential contractor-focused payment workflows
 - July 7, 2025: Code Quality & Documentation - Added comprehensive file headers, documentation, and cleaned up project structure with proper organization
+- July 7, 2025: Application Rebranding - Updated entire application from "ContractorFlow" to "FieldContractorFlow" across all files, components, and documentation
