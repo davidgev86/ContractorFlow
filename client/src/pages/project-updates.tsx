@@ -148,13 +148,14 @@ export default function ProjectUpdates() {
                   New Update
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
+              <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create Project Update</DialogTitle>
                 </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
+                <div className="max-h-[70vh] overflow-y-auto">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                      <FormField
                       control={form.control}
                       name="projectId"
                       render={({ field }) => (
@@ -283,17 +284,21 @@ export default function ProjectUpdates() {
                         </FormItem>
                       )}
                     />
-                    
-                    <div className="flex justify-end space-x-2 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={createUpdateMutation.isPending}>
-                        {createUpdateMutation.isPending ? "Creating..." : "Create Update"}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
+                    </form>
+                  </Form>
+                </div>
+                <div className="flex justify-end space-x-2 pt-4 border-t bg-background sticky bottom-0">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={createUpdateMutation.isPending}
+                    onClick={form.handleSubmit(onSubmit)}
+                  >
+                    {createUpdateMutation.isPending ? "Creating..." : "Create Update"}
+                  </Button>
+                </div>
               </DialogContent>
             </Dialog>
           </div>
