@@ -580,45 +580,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Photo upload endpoint with proper multipart handling
-  app.post('/api/project-updates/photos', isAuthenticated, async (req: any, res) => {
+  app.post('/api/project-updates/photos', isAuthenticated, upload.single('file'), async (req: any, res) => {
     try {
-      // For this demo, we'll create a mock photo record
-      // In production, you'd use multer or similar for file upload
-      const { updateId, caption, fileName } = req.body;
+      const userId = req.user.claims.sub;
+      const updateId = parseInt(req.body.updateId);
       
-      if (updateId) {
-        // Get the project ID from the update
-        const [update] = await db
-          .select()
-          .from(projectUpdates)
-          .where(eq(projectUpdates.id, parseInt(updateId)))
-          .limit(1);
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
 
-        if (update) {
-          await storage.createProjectPhoto({
-            projectId: update.projectId,
-            updateId: parseInt(updateId),
-            fileName: fileName || `photo-${Date.now()}.jpg`,
-            originalName: "uploaded-photo.jpg",
-            caption: caption || "Progress photo",
-            isVisibleToClient: true,
-            uploadedBy: req.user.claims.sub
-          });
-        }
+      if (!updateId) {
+        return res.status(400).json({ message: "Update ID is required" });
       }
       
-      res.json({ success: true, message: "Photo uploaded successfully" });
+      // Get the project ID from the update and verify access
+      const [update] = await db
+        .select()
+        .from(projectUpdates)
+        .where(eq(projectUpdates.id, updateId))
+        .limit(1);
+
+      if (!update) {
+        return res.status(404).json({ message: "Project update not found" });
+      }
+
+      // Verify user owns the project
+      const project = await storage.getProject(update.projectId, userId);
+      if (!project) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const photoData = {
+        projectId: update.projectId,
+        updateId: updateId,
+        fileName: req.file.filename,
+        originalName: req.file.originalname,
+        caption: req.body.caption || "Progress photo",
+        isVisibleToClient: true,
+        uploadedBy: userId
+      };
+
+      const photo = await storage.createProjectPhoto(photoData);
+      res.status(201).json(photo);
     } catch (error) {
       console.error("Photo upload error:", error);
       res.status(500).json({ message: "Failed to upload photo" });
     }
   });
 
-  // Serve photo files (mock endpoint)
+  // Serve project update photo files
   app.get('/api/project-updates/photos/:fileName', (req, res) => {
-    // For demo purposes, return a placeholder image URL
-    // In production, this would serve actual uploaded files
-    res.redirect('https://via.placeholder.com/400x400/3B82F6/FFFFFF?text=Progress+Photo');
+    const filename = req.params.fileName;
+    const filepath = path.join(process.cwd(), 'uploads', filename);
+    res.sendFile(filepath);
   });
 
   // Create client portal user (for contractors to add clients)
